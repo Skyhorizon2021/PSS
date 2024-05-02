@@ -1,4 +1,4 @@
-# Passenger Service System
+# Personal Scheduling System
 PSS is a tool that will assist the user to schedule his/her activities. It will take various "tasks" as input
 and schedule them according to the user's needs. Typical tasks would be attending class, studying,
 working on assignment, and so on. Typical outputs will be daily, weekly, or monthly schedules. PSS
