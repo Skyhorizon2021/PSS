@@ -7,15 +7,32 @@ def menu():
     # Ask to load file
     loadFile()
 
-    print("Menu:\n1. Tasks\n2. Schedule\n3. End Program")
-    userinput = input(int("Select an option:"))
-
     while(userinput != 3):
+        print("Menu\n1. Tasks\n2. Schedule\n3. End Program")
+        userinput = input(int("Select an option:"))
+
         match userinput:
+            # Task Menu
             case 1:
                 print("\n1. Create\n2. Delete\n3. Edit\n4. View")
                 choice = input(int("Option: "))
-                # Insert nested switch state to account for all task modification options
+                match choice:
+                    case 1:
+                        PSS.createTask()
+                        break
+                    case 2:
+                        PSS.deleteTask()
+                        break
+                    case 3:
+                        PSS.editTask()
+                        break
+                    case 4:
+                        PSS.viewTask()
+                        break
+                    case _:
+                        print("Invalid choice...")
+                        break
+            # Schedule Menu
             case 2:
                 print("1. View Schedule\n2. Write Schedule")
                 choice = input(int("Option: "))
@@ -27,11 +44,18 @@ def menu():
                         
                     case 2: 
                         print("1. Write Day Schedule\n2. Write Week Schedule\n3. Write Month Schedule ")
-                        viewer = input(int("Option: "))    
+                        viewer = input(int("Option: "))
+                        break
+                    case _:
+                        break
+            # Ending Program
             case 3:
                 break
-        print("Menu\n1. Tasks\n2. Schedule\n3. End Program")
-        userinput = input(int("Select an option:"))
+            # Default case
+            case _:
+                print("Invalid choice...")
+                break
+        
 
 def loadFile():
     # Asks if they want to load a schedule

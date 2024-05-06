@@ -2,6 +2,7 @@ import sqlite3
 
 class PSS:
 
+    @staticmethod
     def createTask():
         print("Select the type of task:\n1. Recurring\n2. Transcient\n3. Recurring")
         selection = input(int())
@@ -45,7 +46,7 @@ class PSS:
 
 
     def viewTask():
-        name = input("Enter the task name: ")
+        name = input("Enter the task name: ") # can also do 'def viewTask(name)' instead
         # Connect to database
         con = sqlite3.connect('schedule.db')
         cur = con.cursor()
@@ -61,6 +62,11 @@ class PSS:
         con.close()
         
     def deleteTask():
+        name = input("Enter the task name: ") # can also do 'def viewTask(name)' instead
+        
+        # Connect to database
+        con = sqlite3.connect('schedule.db')
+        cur = con.cursor()
         # Search for task name
 
         # Search for task type
@@ -158,3 +164,7 @@ class PSS:
         # Loop for 30 days, write day schedule to file
         pass
 # Just written down the required methods from our PSS diagrams
+
+    def noOverlap():
+        
+        pass
