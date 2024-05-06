@@ -1,4 +1,6 @@
 import sqlite3
+from tkinter import *
+from tkinter import ttk
 
 class PSS:
 
@@ -166,5 +168,14 @@ class PSS:
 # Just written down the required methods from our PSS diagrams
 
     def noOverlap():
-        
+        # Accessing database
+        con = sqlite3.connection('schedule.db')
+        cur = con.cursor()
+
+        # Searching for all recurring type task objects
+        cur = con.execute("SELECT Type from schedule")
+        for row in cur:
+            if row[0] == "Recurring":
+                
+
         pass
