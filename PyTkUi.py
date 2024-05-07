@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import *
+from tkinter import filedialog
 
 
 class MenuBar():
@@ -21,7 +22,7 @@ class MenuBar():
 
         #File Menu
         file = tk.Menu(self.menubar, tearoff=0)
-        file.add_command(label="Open JSON File", command=self.donothing)
+        file.add_command(label="Open JSON File", command=self.upload_file)
         file.add_command(label="Save to JSON File", command=self.donothing)
         self.menubar.add_cascade(label="File", menu=file)
 
@@ -35,8 +36,11 @@ class MenuBar():
         edit.add_command(label="Delete Task", command=self.donothing)
         self.menubar.add_cascade(label="Edit", menu=edit)
 
-    def donothing():
+    def donothing(self):
         print()
+
+    def upload_file(self):
+        newWindow = FileWindow()
 
     def create_task(self):
         newWindow = CreateWindow()
@@ -95,6 +99,23 @@ class CreateWindow(Toplevel):
         
         # message box confirming task submission
         messagebox.showinfo("Task Submitted", "Task '{}' submitted successfully!".format(task_name))
+
+class FileWindow(Toplevel):
+    def __init__(self, master=None):
+        super().__init__(master=master)
+        self.title("File Upload")
+        self.geometry("500x350")
+
+        #button to upload a file
+        self.button = tk.Button(self, text='Open', command=self.upload)
+        self.button.pack()
+
+    def upload(self):
+        filename = filedialog.askopenfilename(title="Choose a file", filetypes= (("JSON files", "*.json")))
+        self.file_name = tk.Label(self, text="File name: " + filename)
+        print('Selected: ', filename)
+
+
 
 #def main():
 #    root = tk.Tk()
