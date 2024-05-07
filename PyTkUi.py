@@ -111,7 +111,7 @@ class FileWindow(Toplevel):
         self.button.pack()
 
     def upload(self):
-        filename = filedialog.askopenfilename(title="Choose a file", filetypes= (("JSON files", "*.json")))
+        filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
         self.file_name = tk.Label(self, text="File name: " + filename)
         print('Selected: ', filename)
 
