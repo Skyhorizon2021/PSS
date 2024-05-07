@@ -6,6 +6,7 @@ from tkinter import *
 class MenuBar():
     def __init__(self, window):
         #Menu
+        window = window
         self.window = window
         
         self.menubar = tk.Menu(self.window)
@@ -37,33 +38,33 @@ class MenuBar():
     def donothing():
         print()
 
-    def create_task():
-        newWindow = CreateWindow
+    def create_task(self):
+        newWindow = CreateWindow()
 
-class CreateWindow(tk.Tk):
-    def __init__(self, master):
-        self.master = master
+class CreateWindow(Toplevel):
+    def __init__(self, master=None):
+        super().__init__(master=master)
         self.title("Create Task")
-        self.geometry("700x500")
+        self.geometry("500x350")
         
         # Labels
-        self.label_task_name = tk.Label(master, text="Task Name:")
-        self.label_task_type = tk.Label(master, text="Task Type:")
-        self.label_start_time = tk.Label(master, text="Start Time (HH:MM):")
-        self.label_duration = tk.Label(master, text="Duration (minutes):")
-        self.label_start_date = tk.Label(master, text="Start Date (YYYY-MM-DD):")
-        self.label_end_date = tk.Label(master, text="End Date (YYYY-MM-DD):")
+        self.label_task_name = tk.Label(self, text="Task Name:")
+        self.label_task_type = tk.Label(self, text="Task Type:")
+        self.label_start_time = tk.Label(self, text="Start Time (HH:MM):")
+        self.label_duration = tk.Label(self, text="Duration (minutes):")
+        self.label_start_date = tk.Label(self, text="Start Date (YYYY-MM-DD):")
+        self.label_end_date = tk.Label(self, text="End Date (YYYY-MM-DD):")
         
         # Entries
-        self.entry_task_name = tk.Entry(master)
-        self.entry_task_type = tk.Entry(master)
-        self.entry_start_time = tk.Entry(master)
-        self.entry_duration = tk.Entry(master)
-        self.entry_start_date = tk.Entry(master)
-        self.entry_end_date = tk.Entry(master)
+        self.entry_task_name = tk.Entry(self)
+        self.entry_task_type = tk.Entry(self)
+        self.entry_start_time = tk.Entry(self)
+        self.entry_duration = tk.Entry(self)
+        self.entry_start_date = tk.Entry(self)
+        self.entry_end_date = tk.Entry(self)
         
         # Buttons
-        self.button_submit = tk.Button(master, text="Submit", command=self.submit_task)
+        self.button_submit = tk.Button(self, text="Submit", command=self.submit_task)
         
         # Layout
         self.label_task_name.grid(row=0, column=0, sticky="e")
