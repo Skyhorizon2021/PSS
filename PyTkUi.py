@@ -49,43 +49,44 @@ class CreateWindow(Toplevel):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Task")
-        self.geometry("500x350")
+        self.geometry("400x200")
+
+        frame=Frame(self)
+        frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
         # Labels
-        self.label_task_name = tk.Label(self, text="Task Name:")
-        self.label_task_type = tk.Label(self, text="Task Type:")
-        self.label_start_time = tk.Label(self, text="Start Time (HH:MM):")
-        self.label_duration = tk.Label(self, text="Duration (minutes):")
-        self.label_start_date = tk.Label(self, text="Start Date (YYYY-MM-DD):")
-        self.label_end_date = tk.Label(self, text="End Date (YYYY-MM-DD):")
+        self.label_task_name = tk.Label(frame, text="Task Name:")
+        self.label_task_type = tk.Label(frame, text="Task Type:")
+        self.label_start_time = tk.Label(frame, text="Start Time (HH:MM):")
+        self.label_duration = tk.Label(frame, text="Duration (minutes):")
+        self.label_start_date = tk.Label(frame, text="Start Date (YYYYMMDD):")
+        self.label_end_date = tk.Label(frame, text="End Date (YYYYMMDD):")
         
         # Entries
-        self.entry_task_name = tk.Entry(self)
-        self.entry_task_type = tk.Entry(self)
-        self.entry_start_time = tk.Entry(self)
-        self.entry_duration = tk.Entry(self)
-        self.entry_start_date = tk.Entry(self)
-        self.entry_end_date = tk.Entry(self)
+        self.entry_task_name = tk.Entry(frame)
+        self.entry_task_type = tk.Entry(frame)
+        self.entry_start_time = tk.Entry(frame)
+        self.entry_duration = tk.Entry(frame)
+        self.entry_start_date = tk.Entry(frame)
+        self.entry_end_date = tk.Entry(frame)
         
         # Buttons
-        self.button_submit = tk.Button(self, text="Submit", command=self.submit_task)
+        self.button_submit = tk.Button(frame, text="Submit", command=self.submit_task)
         
         # Layout
-        self.label_task_name.grid(row=0, column=0, sticky="e")
-        self.label_task_type.grid(row=1, column=0, sticky="e")
-        self.label_start_time.grid(row=2, column=0, sticky="e")
-        self.label_duration.grid(row=3, column=0, sticky="e")
-        self.label_start_date.grid(row=4, column=0, sticky="e")
-        self.label_end_date.grid(row=5, column=0, sticky="e")
+        self.label_task_name.grid(row=0, column=0, sticky="e", pady=5)
+        self.label_start_time.grid(row=2, column=0, sticky="e", pady=5)
+        self.label_duration.grid(row=3, column=0, sticky="e", pady=5)
+        self.label_start_date.grid(row=4, column=0, sticky="e", pady=5)
+        self.label_end_date.grid(row=5, column=0, sticky="e", pady=5)
         
         self.entry_task_name.grid(row=0, column=1)
-        self.entry_task_type.grid(row=1, column=1)
         self.entry_start_time.grid(row=2, column=1)
         self.entry_duration.grid(row=3, column=1)
         self.entry_start_date.grid(row=4, column=1)
         self.entry_end_date.grid(row=5, column=1)
         
-        self.button_submit.grid(row=6, columnspan=2)
+        self.button_submit.grid(row=6, columnspan=2, pady=8)
         
     def submit_task(self):
         # Retrieve task details from entries
@@ -104,11 +105,13 @@ class FileWindow(Toplevel):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("File Upload")
-        self.geometry("500x350")
+        self.geometry("400x200")
 
         #button to upload a file
-        self.button = tk.Button(self, text='Open', command=self.upload)
-        self.button.pack()
+        self.label = tk.Label(self, text="Add Tasks Through JSON File")
+        self.button = tk.Button(self, text='Upload your file', command=self.upload)
+        self.label.place(relx=.5, rely=.4, anchor = CENTER)
+        self.button.place(relx=.5, rely=.5, anchor = CENTER)
 
     def upload(self):
         filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
