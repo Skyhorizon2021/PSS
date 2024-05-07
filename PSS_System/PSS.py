@@ -1,6 +1,9 @@
 import sqlite3
-from tkinter import *
-from tkinter import ttk
+import Schedule
+from PSS_System.Models.RecurringModel import Recurring
+from PSS_System.Models.TransientModel import Transient
+from PSS_System.Models.AntiTaskModel import Anti
+import datetime
 
 class PSS:
 
@@ -43,7 +46,7 @@ class PSS:
                 date = input(int("Enter the task's date: "))
 
                 # Creating anti task
-                anTask = AntiTask(name, start, duration, date, taskType)
+                anTask = Anti(name, start, duration, date, taskType)
                 return anTask
 
 
@@ -166,16 +169,3 @@ class PSS:
         # Loop for 30 days, write day schedule to file
         pass
 # Just written down the required methods from our PSS diagrams
-
-    def noOverlap():
-        # Accessing database
-        con = sqlite3.connection('schedule.db')
-        cur = con.cursor()
-
-        # Searching for all recurring type task objects
-        cur = con.execute("SELECT Type from schedule")
-        for row in cur:
-            if row[0] == "Recurring":
-                
-
-        pass
