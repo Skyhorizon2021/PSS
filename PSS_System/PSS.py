@@ -1,5 +1,5 @@
 import sqlite3
-import schedule
+import Schedule
 from PSS_System.Models.RecurringModel import Recurring
 from PSS_System.Models.TransientModel import Transient
 from PSS_System.Models.AntiTaskModel import Anti

@@ -1,6 +1,6 @@
 import datetime
-from email.utils import formatdate
-import Schedule
+from Schedule import *
+
 class Checking:
 
     def noOverlap(startdate, enddate, frequency):
@@ -11,36 +11,50 @@ class Checking:
 
     # Returns boolean value if date is valid
     def checkDate(date):
-        month = str(date)[4:6]
-        day = str(date)[6:]
-        # Checks if month's and their days are valid
-        match month:
-            case "01" | "03" | "05" | "07" | "08" | "10" | "12": 
-                if day < 1 or day > 31:
+        # If a date object is successfully created, return true
+        try:
+            year = str(date)[:4]
+            month = str(date)[4:6]
+            day = str(date)[6:]
+            start = datetime.date(int(year), int(month), int(day))
+            return True
+        except:
+            return False
+    
+    # Validates a unique name
+    def checkName(name):
+        names = []
+        
+        # Retrieves and validate schedule
+        listsche = Schedule.getData()
+        del listsche['_id']
+
+        # Gets every task and checks if name is unique
+        for dict in listsche.values():
+            for detail in dict.values():
+                if name in detail.values():
                     return False
-            case "04" | "06" | "09" | "11": 
-                if day < 1 or day > 30:
-                    return False
-            case "02":
-                if day < 1 or day > 28:
-                    return False
-            case _:
-                return False
-            
-        # Should return true if fails all false cases
         return True
+
+    # Validates a correct duration
+    def validDuration(duration):
+        return duration >= 0.25 and duration <=23.75
+    
+    # Validates a correct time
+    def validTime(time):
+        return time >= 0.25 and time <=23.75
     
     # Help in iterateDate() to get proper month formatting
-    def formatDate(num):
+    def formatDate(self, num):
         if num < 10:
             return "0" + str(num)
         else:
             return str(num)
         
     # Help create recurring tasks
-    def interateDate(startDate, endDate, frequency):
+    def interateDate(self, startDate, endDate, frequency):
         dates = []
-        
+
         # Set starting date
         year = str(startDate)[:4]
         month = str(startDate)[4:6]
@@ -58,8 +72,6 @@ class Checking:
         while res_date <= end:
             res_date += datetime.timedelta(days=frequency)
             
-            dates.append(int(str(res_date.year) + formatdate(res_date.month) + formatdate(res_date.day)))
+            dates.append(int(str(res_date.year) + self.formatDate(res_date.month) + self.formatDate(res_date.day)))
 
         return dates
-
-    
