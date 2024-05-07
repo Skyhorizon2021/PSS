@@ -1,7 +1,6 @@
 import json
-import pandas as pd
-from pandas import Series, DataFrame
 import sqlite3
+import PSS
 
 def menu():
     # Ask to load file
@@ -19,19 +18,14 @@ def menu():
                 match choice:
                     case 1:
                         PSS.createTask()
-                        break
                     case 2:
                         PSS.deleteTask()
-                        break
                     case 3:
                         PSS.editTask()
-                        break
                     case 4:
                         PSS.viewTask()
-                        break
                     case _:
                         print("Invalid choice...")
-                        break
             # Schedule Menu
             case 2:
                 print("1. View Schedule\n2. Write Schedule")
@@ -45,16 +39,14 @@ def menu():
                     case 2: 
                         print("1. Write Day Schedule\n2. Write Week Schedule\n3. Write Month Schedule ")
                         viewer = input(int("Option: "))
-                        break
                     case _:
-                        break
+                        continue # Replace
             # Ending Program
             case 3:
-                break
+                continue # Replace
             # Default case
             case _:
                 print("Invalid choice...")
-                break
         
 
 def loadFile():
@@ -84,7 +76,6 @@ def loadFile():
                         schedule['Frequency'][i]))
                     connection.commit()
                     connection.close()
-                    break
                 except FileNotFoundError:
                     print("There is no file of that name.\nPlease try again...")
                     # Will ask if they want to reenter again (also used to quit if 
