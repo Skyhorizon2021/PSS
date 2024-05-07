@@ -1,8 +1,8 @@
 import sqlite3
 import Schedule
-from PSS_System.Models.RecurringModel import Recurring
-from PSS_System.Models.TransientModel import Transient
-from PSS_System.Models.AntiTaskModel import Anti
+from Models.RecurringModel import Recurring
+from Models.TransientModel import Transient
+from Models.AntiTaskModel import Anti
 import datetime
 
 class PSS:
