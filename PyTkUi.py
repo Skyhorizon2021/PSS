@@ -1,10 +1,50 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import *
 
-class TaskSchedulerApp:
+
+class MenuBar():
+    def __init__(self, window):
+        #Menu
+        self.window = window
+        
+        self.menubar = tk.Menu(self.window)
+        self.window.config(menu=self.menubar)
+
+        #Display Menu
+        display = tk.Menu(self.menubar, tearoff=0)
+        display.add_command(label="Show Day", command=self.donothing)
+        display.add_command(label="Show Week", command=self.donothing)
+        display.add_command(label="Show Month", command=self.donothing)
+        self.menubar.add_cascade(label="Display", menu=display)
+
+        #File Menu
+        file = tk.Menu(self.menubar, tearoff=0)
+        file.add_command(label="Open JSON File", command=self.donothing)
+        file.add_command(label="Save to JSON File", command=self.donothing)
+        self.menubar.add_cascade(label="File", menu=file)
+
+        #Edit Menu
+        edit = tk.Menu(self.menubar, tearoff=0)
+        edit.add_command(label="Create Recurring Task", command=self.create_task)
+        edit.add_command(label="Create Transient Task", command=self.donothing)
+        edit.add_command(label="Create Anti-Task", command=self.donothing)
+        edit.add_command(label="Edit Task", command=self.donothing)
+        edit.add_separator()
+        edit.add_command(label="Delete Task", command=self.donothing)
+        self.menubar.add_cascade(label="Edit", menu=edit)
+
+    def donothing():
+        print()
+
+    def create_task():
+        newWindow = CreateWindow
+
+class CreateWindow(tk.Tk):
     def __init__(self, master):
         self.master = master
-        master.title("Personal Scheduler System (PSS)")
+        self.title("Create Task")
+        self.geometry("700x500")
         
         # Labels
         self.label_task_name = tk.Label(master, text="Task Name:")
@@ -55,10 +95,20 @@ class TaskSchedulerApp:
         # message box confirming task submission
         messagebox.showinfo("Task Submitted", "Task '{}' submitted successfully!".format(task_name))
 
-def main():
-    root = tk.Tk()
-    app = TaskSchedulerApp(root)
-    root.mainloop()
+#def main():
+#    root = tk.Tk()
+#    app = MenuWindow(root)
+#    root.mainloop()
+
+class MainWindow(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Personal Scheduling System (PSS)")
+        self.geometry("700x500")
+
+        menubar = MenuBar(self)
+        
 
 if __name__ == "__main__":
-    main()
+    app=MainWindow()
+    app.mainloop()
