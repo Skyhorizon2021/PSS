@@ -3,11 +3,16 @@ from Schedule import *
 
 class Checking:
 
-    def noOverlap(startdate, enddate, frequency):
+    def noOverlap(self, start, end, frequency):
         listsche = Schedule.getData()
+        del listsche['_id']
 
-        for dates in listsche:
-            pass
+        dates = self.interateDate(start, end, frequency)
+
+        for i in dates:
+            if dates[i] in listsche:
+                listsche.values()
+
 
     # Returns boolean value if date is valid
     def checkDate(date):
@@ -75,3 +80,10 @@ class Checking:
             dates.append(int(str(res_date.year) + self.formatDate(res_date.month) + self.formatDate(res_date.day)))
 
         return dates
+    
+    def convertTime(time):
+        newtime = []
+        start = time.split()
+        newtime[0] = int(start[0])
+        newtime[1] = int(start[1]) / 15
+        newtime[1] += round(int(start[1]) % 15)/4
