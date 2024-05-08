@@ -110,7 +110,7 @@ class FileWindow(Toplevel):
         #button to upload a file
         self.label = tk.Label(self, text="Add Tasks Through JSON File")
         self.button = tk.Button(self, text='Upload your file', command=self.upload)
-        self.label.place(relx=.5, rely=.4, anchor = CENTER)
+        self.label.place(relx=.5, rely=.38, anchor = CENTER)
         self.button.place(relx=.5, rely=.5, anchor = CENTER)
 
     def upload(self):
@@ -118,6 +118,20 @@ class FileWindow(Toplevel):
         self.file_name = tk.Label(self, text="File name: " + filename)
         print('Selected: ', filename)
 
+class DayFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+
+class WeekFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+
+class MonthFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
 
 
 #def main():
