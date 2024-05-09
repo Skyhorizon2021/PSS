@@ -196,5 +196,3 @@ class Checking:
 
         # Validates if all checks fail
         return True
-            
-

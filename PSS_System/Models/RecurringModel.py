@@ -1,6 +1,6 @@
-import TaskModel
+from Models.TaskModel import Task
 
-class Recurring(TaskModel):
+class Recurring(Task):
     def __init__(self, _name, _start, _duration, _date, _type, _endDate, _frequency):
         super.__init__(_name, _start, _duration, _date)
         self.type = _type

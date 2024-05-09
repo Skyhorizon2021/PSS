@@ -1,9 +1,11 @@
 import sqlite3
-import Schedule
+from Schedule import *
 from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
 import datetime
+from Checking import *
+import pymongo
 
 class PSS:
 
@@ -25,7 +27,11 @@ class PSS:
                 # Creating recurring task
                 reTask = Recurring(name, start, duration, startDate, taskType,
                 endDate, frequency)
-                return reTask
+                if Checking.noOverlap(reTask):
+                    return reTask
+                else:
+                    print("Task creation failed...")
+            
             case 2:
                 # Entering parameters
                 name = input("Enter the name of the task: ")
@@ -51,29 +57,61 @@ class PSS:
 
 
     def viewTask():
-        name = input("Enter the task name: ") # can also do 'def viewTask(name)' instead
-        # Connect to database
-        con = sqlite3.connect('schedule.db')
-        cur = con.cursor()
+        name = input("Enter the task name: ")
+        
+        # Gets the schedule
+        listSche = Schedule.getData()
 
-        # Select Name to match the search
-        cur = con.execute("SELECT Name from schedule")
-        for row in cur:
-            # Display the match
-            if row[0] == name:
-                # Format display later
-                print(row)
+        for days in listSche:
+            task = listSche[days]
+            for detail in task:
+                if name == task[detail]['Name']:
+                    print("Name: ", task[detail]['Name'])
+                    print("Type: ", task[detail]['Task Type'])
+                    print("Date: ", days)
+                    print("Time: ", task[detail]['Time'])
+                    print("Duration: ", task[detail]['Duration'])
+                    if task[detail]["Task Type"] == "Recurring":
+                        print("End Date: ", task[detail]['EndDate'])
+                        print('Frequency: ', task[detail]['Frequency'])
                 break
-        con.close()
-        
-    def deleteTask():
-        name = input("Enter the task name: ") # can also do 'def viewTask(name)' instead
-        
-        # Connect to database
-        con = sqlite3.connect('schedule.db')
-        cur = con.cursor()
-        # Search for task name
 
+    def deleteTask():
+        #name = input("Enter the task name: ")
+        name = "A"
+        # Gets the schedule
+        listSche = Schedule.getData()
+
+        # Search for task name
+        for days in listSche:
+            task = listSche[days]
+            for detail in task:
+                if name == task[detail]['Name']:
+                    key_list = list(listSche[days].keys())
+                    value_list = list(listSche[days].values())
+                    date = days
+                    taskType = task[detail]["Task Type"]
+                    match taskType:
+                        case "Recurring Task":
+                            pass
+                        case "Anti Task":
+                            pass
+                        case "Transient Task":
+                            pass
+                    matchTask = task[detail]
+                
+                    value = value_list.index(matchTask)
+        x = key_list[value]
+        del listSche[date][x]
+
+        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+
+        database = myclient["schedule"]
+
+        database.
+
+        print(listSche)
+                    #del key_list[value]
         # Search for task type
 
         #If recurring, check for anti task to delete with
@@ -160,7 +198,8 @@ class PSS:
         pass
 
     def writeMonthSchedule():
-        # Checks for file name
+        #
+        #  Checks for file name
 
         # Checks for start of the month
 
@@ -169,3 +208,5 @@ class PSS:
         # Loop for 30 days, write day schedule to file
         pass
 # Just written down the required methods from our PSS diagrams
+
+PSS.deleteTask()
