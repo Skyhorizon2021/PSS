@@ -30,6 +30,58 @@
             "Name":"C",
             "Time":"17:45:00",
             "Duration":"3"
+        },
+        "Task 2":{
+            "Task Type":"Recurring Task",
+            "Name":"B",
+            "Time":"17:45:00",
+            "Duration":"3",
+            "EndDate":"03/25/2025",
+            "Frequency": 7
+        },
+        "Task 3":{
+            "Task Type":"Transient Task",
+            "Name":"F",
+            "Time":"22:00:00",
+            "Duration":"1"
+        }
+    },
+    "20240417" : {
+        "Task 1":{
+            "Task Type":"Transient Task",
+            "Name":"A",
+            "Time": "17:45:00",
+            "Duration": "3"
+        }
+    },
+    "20240331":{
+        "Task 1":{
+            "Task Type":"Recurring Task",
+            "Name":"B",
+            "Time": "17:45:00",
+            "Duration": "3", 
+            "EndDate":"03/25/2025",
+            "Frequency": 7
+        }
+    },
+    "20240407":{
+        "Task 1":{
+            "Task Type":"Recurring Task",
+            "Name":"B",
+            "Time": "17:45:00",
+            "Duration": "3", 
+            "EndDate":"03/25/2025",
+            "Frequency": 7
+        }
+    },
+    "20240414":{
+        "Task 1":{
+            "Task Type":"Recurring Task",
+            "Name":"B",
+            "Time": "17:45:00",
+            "Duration": "3", 
+            "EndDate":"03/25/2025",
+            "Frequency": 7
         }
     }
 }

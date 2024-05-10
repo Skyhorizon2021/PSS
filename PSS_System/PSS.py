@@ -76,50 +76,81 @@ class PSS:
                         print('Frequency: ', task[detail]['Frequency'])
                 break
 
-    def deleteTask():
-        #name = input("Enter the task name: ")
-        name = "A"
+    def deleteTask(self, name):
+        
         # Gets the schedule
         listSche = Schedule.getData()
+        tempSche = Schedule.getData()
 
         # Search for task name
         for days in listSche:
             task = listSche[days]
             for detail in task:
+                # Matching task name
                 if name == task[detail]['Name']:
                     key_list = list(listSche[days].keys())
                     value_list = list(listSche[days].values())
                     date = days
+                    taskDet = task
+                    # Matching task type 
                     taskType = task[detail]["Task Type"]
-                    match taskType:
-                        case "Recurring Task":
-                            pass
-                        case "Anti Task":
-                            pass
-                        case "Transient Task":
-                            pass
+                    start = task[detail]["Time"]
+                    dur = task[detail]["Duration"]
+                    if taskType == "Recurring Task":
+                        end = task[detail]["EndDate"]
+                        freq = task[detail]["Frequency"]
+
                     matchTask = task[detail]
                 
                     value = value_list.index(matchTask)
+        # Gets the key value for the task
         x = key_list[value]
-        del listSche[date][x]
-
+        
+        # Searching inside database
         myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 
-        database = myclient["schedule"]
+        mydb = myclient["schedule"]
+        mycol = mydb["tasks"]
 
-        database.
+        query = {date : taskDet}
+        mod = Checking()
 
-        print(listSche)
-                    #del key_list[value]
-        # Search for task type
+        match taskType:
+            case "Recurring Task":
+                try:
+                    checkingTask = Recurring(name, start, dur, date, taskType, end, freq)
+                    antiName = mod.checkAnti(checkingTask)
+                    if antiName != "":
+                        self.deleteTask(antiName)
+                    del tempSche[date][x]
+                    # Deletes the day from schedule if no tasks are stored
+                    if tempSche[date] == {}:
+                        del tempSche[date]
+                    # Replaces the day with the new day schedule
+                    mycol.replace_one(query, tempSche)
+                    # Continue to delete all instances of the task with its name
+                    self.deleteTask(name)
+                except:
+                    print("Deleted all occurances of {}".format(name))
+                    pass
+            case "Anti Task":
+                checkingTask = Anti(name, start, dur, date, taskType)
+                # Checks if deleting antitask will not cause conflict
+                if mod.noOverlapAntiDelete(checkingTask):
+                    del tempSche[date][x]
+                    if tempSche[date] == {}:
+                        del tempSche[date]
+                    # Replaces the day with the new day schedule
+                    mycol.replace_one(query, tempSche)
+                else:
+                    print("Conflicting tasks upon deletion. Operation terminated...")
+            # Just deletes the task, no checking required
+            case "Transient Task":
+                del tempSche[date][x]
+                if tempSche[date] == {}:
+                    del tempSche[date]
+                mycol.replace_one(query, tempSche)
 
-        #If recurring, check for anti task to delete with
-
-        # If antitask, check if delete it will cause an overlap
-        # and causing conflict between two tasks
-        # Generate an error message if it is not deleted
-        pass
     def editTask():
         # Check for task name
 
@@ -209,4 +240,5 @@ class PSS:
         pass
 # Just written down the required methods from our PSS diagrams
 
-PSS.deleteTask()
+sched = PSS()
+sched.deleteTask("C")
