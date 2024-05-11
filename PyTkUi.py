@@ -13,9 +13,11 @@ class MenuBar():
         self.menubar = tk.Menu(self.window)
         self.window.config(menu=self.menubar)
 
+        DefaultFrame = Frame(window)
+
         #Display Menu
         display = tk.Menu(self.menubar, tearoff=0)
-        display.add_command(label="Show Day", command=self.donothing)
+        display.add_command(label="Show Day", command=self.show_day(DefaultFrame, window))
         display.add_command(label="Show Week", command=self.donothing)
         display.add_command(label="Show Month", command=self.donothing)
         self.menubar.add_cascade(label="Display", menu=display)
@@ -36,6 +38,8 @@ class MenuBar():
         edit.add_command(label="Delete Task", command=self.donothing)
         self.menubar.add_cascade(label="Edit", menu=edit)
 
+        #WeekFrame(DefaultFrame, window).pack()
+
     def donothing(self):
         print()
 
@@ -44,6 +48,11 @@ class MenuBar():
 
     def create_task(self):
         newWindow = CreateWindow()
+
+    def show_day(self, parentFrame, parentTk):
+        new_window = DayWindow()
+        new = DayFrame(parentFrame, parentTk)
+        new.pack()
 
 class CreateWindow(Toplevel):
     def __init__(self, master=None):
@@ -118,10 +127,38 @@ class FileWindow(Toplevel):
         self.file_name = tk.Label(self, text="File name: " + filename)
         print('Selected: ', filename)
 
+class DayWindow(Toplevel):
+    def __init__(self, master=None):
+        super().__init__(master=master)
+        self.title("Schedule Display")
+        self.geometry("400x200")
+    
+        frame=Frame(self)
+        frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+        self.label = tk.Label(frame, text="Day to Display:")
+        self.entry = tk.Entry(frame)
+
+        self.label.pack()
+        self.entry.pack()
+
+        self.button = tk.Button(frame, text="Submit", command=self.submit)
+        self.button.pack()
+
+    def submit(self):
+        
+
+#class DefaultFrame(tk.Frame):
+#    def __init__(self, parent, controller):
+#        tk.Frame.__init__(self, parent)
+#        self.controller = controller
+
 class DayFrame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.label = Label(self, text="Temp Label")
+        self.label.pack()
 
 class WeekFrame(tk.Frame):
     def __init__(self, parent, controller):
@@ -145,7 +182,14 @@ class MainWindow(tk.Tk):
         self.title("Personal Scheduling System (PSS)")
         self.geometry("700x500")
 
+        #container = tk.Frame(self)
+        #page = DefaultFrame(parent=container, controller=self)
         menubar = MenuBar(self)
+    
+    #def show_frame(self, page_name):
+    #    '''Show a frame for the given page name'''
+    #    frame = self.frames[page_name]
+    #    frame.tkraise()
         
 
 if __name__ == "__main__":
