@@ -4,6 +4,7 @@ from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
 from Checking import *
 import pymongo
+from bson.json_util import dumps
 
 class PSS:
 
@@ -39,27 +40,29 @@ class PSS:
                             newSche[str(days)] = {newIndex : {}}
                             newSche[str(days)][newIndex] = newdict
                         task.date = days
-                    mycol.replace_one({}, newSche)    
+                    mycol.replace_one({}, newSche)   
                 else:
                     print("A task exists during this period")
 
             case "Transient Task":
                 if mod.noOverlapAdd(task):
-                    newIndex = mod.getTaskIndex(days)
+                    newIndex = mod.getTaskIndex(task.date)
                     newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
                     try:
                         newSche[date][newIndex] = newdict
                     except:
                         newSche[date] = {newIndex : {}}
                         newSche[date][newIndex] = newdict
+                    mycol.replace_one({}, newSche)
                 else:
                     print("Task exists during this period")
 
             case "Anti Task":
                 if mod.checkRecurring(task):
-                    newIndex = mod.getTaskIndex(days)
+                    newIndex = mod.getTaskIndex(task.date)
                     newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
                     newSche[date][newIndex] = newdict
+                    mycol.replace_one({}, newSche)
                 else:
                     print("Recurring Task does not exist")
         return True
@@ -144,7 +147,7 @@ class PSS:
             case "Anti Task":
                 checkingTask = Anti(name, start, dur, date, taskType)
                 # Checks if deleting antitask will not cause conflict
-                if mod.noOverlapAntiDelete(checkingTask):
+                if mod.noOverlapAnti(checkingTask):
                     del tempSche[date][x]
                     if tempSche[date] == {}:
                         del tempSche[date]
@@ -200,30 +203,60 @@ class PSS:
             # Unspecified Task Error
             print("Error in task's value")
 
-    def writeToFile():
-        filename = input("Enter a file name: ")
-        # Validate file name (either create new or exisiting)
+    def writeToFile(filename):
+        # Connects to database to retrieve data
+        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+
+        mydb = myclient["schedule"]
+        mycol = mydb["tasks"]
+        cur = mycol.find_one()
 
         # Print to file
+        try:
+            with open(filename, 'w') as jsonfile:
+                json.dump(json.load(dumps(cur)), jsonfile)
+        except FileNotFoundError:
+            print("File does not exist")
 
-    def readFromFile():
-        # Search for file name
+    def readFromFile(filename):
+        Schedule.loadData(filename)
 
-        # Validate format and no overlap
+    def viewDaySchedule(date):
+        mod = Checking()
 
-        # Load task from JSON to schedule
-        pass
-
-    def viewDaySchedule():
-        # Checks for file name
-
-        # Checks for start date
-
-        # Check for antitasks (no display purposes)
-
-        # Print out the day schedule
-
-        pass
+        listSche = mod.hideAnti(date)
+        tempSche = mod.hideAnti(date)
+        
+        sortedTasks = []
+        sortedSchedule = []
+        try:
+            while listSche[date] != {}:
+                minTime = 24
+                for tasks in listSche[date]:
+                    start = mod.convertTime(listSche[date][tasks]['Time'])
+                    # Gets the earliest start time
+                    if start < minTime:
+                        minTime = start
+                        selectTask = tasks
+                # Deletes the earliest task for iteration
+                del listSche[date][selectTask]
+                # Appends if task's time is the earliest
+                for tasks in tempSche[date]:
+                        if mod.convertTime(tempSche[date][tasks]['Time']) == minTime:
+                            sortedTasks.append(tasks)
+                            break
+            
+            # Returns the task objects in a sorted array
+            i = 0
+            for tasks in sortedTasks:
+                if tasks == sortedTasks[i]:
+                    sortedSchedule.append(tempSche[date][tasks])
+                i += 1
+        except:
+            # Day does not exists
+            print("Day Schedule does not exist")
+        print(sortedSchedule)
+        return sortedSchedule
 
     def viewWeekSchedule():
         # Checks for file name
@@ -245,7 +278,7 @@ class PSS:
         # Loop for 30 days, print out day schedule
         pass
 
-    def writeDaySchedule():
+    def writeDaySchedule(filename):
         # Checks for file name
 
         # Checks for start date
@@ -277,7 +310,7 @@ class PSS:
         pass
 # Just written down the required methods from our PSS diagrams
 
-testtask = Recurring("Sample Test 1", "10:15:00", ".75", "20240217", "Recurring Task", "20240415", "7")
-
-sched = PSS()
-sched.createTask(testtask)
+#checkingTask = Anti("Cancellation 2", "11:15:00", ".75", "20240217", "Anti Task")
+#x = PSS()
+#x.createTask(checkingTask)
+PSS.viewDaySchedule("20240217")

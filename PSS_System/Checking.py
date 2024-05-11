@@ -2,6 +2,7 @@ import datetime
 from Schedule import *
 from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
+from Models.AntiTaskModel import Anti
 
 class Checking:
 
@@ -229,7 +230,7 @@ class Checking:
         # Validates if all checks fail
         return True
     
-    def noOverlapAntiDelete(self, task):
+    def noOverlapAnti(self, task):
         listsche = Schedule.getData()
         old = 0
         new = 24.00
@@ -323,7 +324,7 @@ class Checking:
         # Validates if all checks fail
         return True
     
-    # Checks if any recurring tasks have an antitask (for deleting task)
+    # Checks if any recurring tasks have an antitask (for deleting recurring task)
     def checkAnti(self, task):
         listSche = Schedule.getData()
 
@@ -338,19 +339,19 @@ class Checking:
 
         return ""
     
-    # Check if there is a recurring task to match antitask (for creating tasks)
+    # Check if there is a recurring task to match antitask (for creating anti tasks)
     def checkRecurring(self, task):
         listSche = Schedule.getData()
         
         date = task.date
-        for days in listSche:
-            tasks = listSche[date[days]].values()
-            for detail in tasks:
-                if detail['Task Type'] == "Recurring Task" and task.startTime == detail['Time'] and task.duration == detail['Duration']:
-                    # Returns True if there is a match
-                    return True
+        for tasks in listSche[date]:
+            detail = listSche[date][tasks]
+            if detail['Task Type'] == "Recurring Task" and task.startTime == detail['Time'] and task.duration == detail['Duration']:
+                # Returns True if there is a match
+                return True
         return False
-                
+
+    # Gets the missing task id          
     def getTaskIndex(self, date):
         listSche = Schedule.getData()
 
@@ -381,7 +382,7 @@ class Checking:
 
         return newtask
 
-    
+    # Validates Tasks attributes are appropriate    
     def checkAll(self, task):
         taskType = task.type
 
@@ -392,3 +393,22 @@ class Checking:
             return True
         else:
             return False
+
+    def hideAnti(self, date):
+        listSche = Schedule.getData()
+        tempSche = Schedule.getData()
+
+        for tasks in listSche[date]:
+            y = listSche[date][tasks]
+            if y['Task Type'] == "Anti Task":
+                checkingTask = Anti(y['Name'], y['Time'], y['Duration'], date, y['Task Type'])
+                if self.noOverlapAnti(checkingTask):
+                    time = y['Time']
+                    dur = y['Duration']
+                    for pairtask in listSche[date]:
+                        x = listSche[date][pairtask]
+                        if x['Task Type'] == "Recurring Task" and x['Time'] == time and x['Duration'] == dur:
+                            del tempSche[date][pairtask]
+                    del tempSche[date][tasks]
+
+        return tempSche

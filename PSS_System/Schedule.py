@@ -2,13 +2,13 @@ import pymongo
 import json
 
 class Schedule:
-    def loadData():
+    def loadData(filename):
         myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 
         mydb = myclient["schedule"]
         mycol = mydb["tasks"]
 
-        with open("Resources//db_example.json") as file:
+        with open(filename) as file:
             file_data = json.load(file)
 
         mycol.insert_one(file_data)
