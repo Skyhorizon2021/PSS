@@ -16,7 +16,7 @@ class Checking:
             return False
     
     # Validates a unique name
-    def checkName(name):
+    def checkName(self, name):
         names = []
         
         # Retrieves and validate schedule
@@ -29,12 +29,27 @@ class Checking:
                     return False
         return True
 
+    # Validates correct task type
+    def checkType(self, type):
+        taskTypes = ["Anti Task", "Recurring Task", "Transient Task"]
+        if type in taskTypes:
+            return True
+        else:
+            return False
+    
+    # Validates correct frequency
+    def checkFreq(self, freq):
+        freq = int(freq)
+        return freq == 1 | freq == 7
+
     # Validates a correct duration
-    def validDuration(duration):
+    def validDuration(self, duration):
+        duration = float(duration)
         return duration >= 0.25 and duration <=23.75
     
     # Validates a correct time
-    def validTime(time):
+    def validTime(self, time):
+        time = self.convertTime(time)
         return time >= 0.25 and time <=23.75
     
     # Help in iterateDate() to get proper month formatting
@@ -63,6 +78,8 @@ class Checking:
         # Set ending date
         end = self.separateDate(endDate)
         end = datetime.date(end[0], end[1], end[2])
+
+        frequency = int(frequency)
 
         # Get the dates dependent on its frequency
         res_date = start
@@ -123,8 +140,8 @@ class Checking:
 
         # Checks if recurring type to get start and end dates, and frequency
         if issubclass(type(task), Recurring):
-            end = task.endDate
-            frequency = task.frequency
+            end = int(task.endDate)
+            frequency = int(task.frequency)
         else:
             end = start
             frequency = 1
@@ -142,52 +159,61 @@ class Checking:
         
         # Gets the end time of yesterday's last task
         for days in range(len(yesterday)):
-            tasks = listsche[dates[days]].values()
-            for detail in tasks:
-                time = self.convertTime(detail['Time'])
-                duration = float(detail['Duration'])
-                # Calculates a task's end time
-                endtime = time + duration
-                # Gets the latest task's end time
-                if endtime > old:
-                    old = endtime
+            try:
+                tasks = listsche[dates[days]].values()
+                for detail in tasks:
+                    time = self.convertTime(detail['Time'])
+                    duration = float(detail['Duration'])
+                    # Calculates a task's end time
+                    endtime = time + duration
+                    # Gets the latest task's end time
+                    if endtime > old:
+                        old = endtime
+            except:
+                # Date does not exist in the schedule
+                old = 0
 
         # Get the start time of the next day's first task
         for days in range(len(tomorrow)):
-            tasks = listsche[dates[days]].values()
-            for detail in tasks:
-                starttime = self.convertTime(detail['Time'])
-                # Gets the earliest time a task starts for the next day as upper boundx
-                if starttime < new:
-                    new = starttime
+            try:
+                tasks = listsche[dates[days]].values()
+                for detail in tasks:
+                    starttime = self.convertTime(detail['Time'])
+                    # Gets the earliest time a task starts for the next day as upper boundx
+                    if starttime < new:
+                        new = starttime
+            except:
+                # Date does not exist in the schedule
+                new = 24
                 
         # Gets all tasks for the days
         for days in range(len(dates)):
-            print(dates)
-            tasks = listsche[dates[days]].values()
-            # Access each tasks details
-            for detail in tasks:
-                # Get times for each tasks
-                print(detail)
-                time = self.convertTime(detail['Time'])
-                duration = float(detail['Duration'])
-                total = time  + duration
-                
-                # Checks if the tasks start during another task
-                if taskStart > time and taskStart < total:
-                    return False
-                # Checks if the task ends before during another task
-                elif taskStart < time and taskEnd < total:
-                    return False
-                # Checks if the task envelopes another task
-                elif taskStart < time and taskEnd > total:
-                    return False
-                # Checks if the task is enveloped by another task
-                elif taskStart > time and taskEnd < total:
-                    return False
-                # Checks if task is the exact time slot as another task
-                elif taskStart == time and taskEnd == total:
-                    return False
+            try:
+                tasks = listsche[dates[days]].values()
+                # Access each tasks details
+                for detail in tasks:
+                    # Get times for each tasks
+                    time = self.convertTime(detail['Time'])
+                    duration = float(detail['Duration'])
+                    total = time  + duration
+                    
+                    # Checks if the tasks start during another task
+                    if taskStart > time and taskStart < total and taskEnd > total:
+                        return False
+                    # Checks if the task ends during another task
+                    elif taskStart < time and taskEnd < total and taskEnd > time:
+                        return False
+                    # Checks if the task envelopes another task
+                    elif taskStart < time and taskEnd > total:
+                        return False
+                    # Checks if the task is enveloped by another task
+                    elif taskStart > time and taskEnd < total:
+                        return False
+                    # Checks if task is the exact time slot as another task
+                    elif taskStart == time and taskEnd == total:
+                        return False
+            except:
+                pass
 
         # Set the latest end time as lower bound if exceeds next day
         if old > 24.00:
@@ -297,7 +323,7 @@ class Checking:
         # Validates if all checks fail
         return True
     
-    # Checks if any recurring tasks have an antitask 
+    # Checks if any recurring tasks have an antitask (for deleting task)
     def checkAnti(self, task):
         listSche = Schedule.getData()
 
@@ -307,6 +333,62 @@ class Checking:
             tasks = listSche[date[days]].values()
             for detail in tasks:
                 if task.startTime == detail['Time'] and task.duration == detail['Duration']:
+                    # Returns the name of antitask for search
                     return detail['Name']
 
         return ""
+    
+    # Check if there is a recurring task to match antitask (for creating tasks)
+    def checkRecurring(self, task):
+        listSche = Schedule.getData()
+        
+        date = task.date
+        for days in listSche:
+            tasks = listSche[date[days]].values()
+            for detail in tasks:
+                if detail['Task Type'] == "Recurring Task" and task.startTime == detail['Time'] and task.duration == detail['Duration']:
+                    # Returns True if there is a match
+                    return True
+        return False
+                
+    def getTaskIndex(self, date):
+        listSche = Schedule.getData()
+
+        count = []
+        date = str(date)
+
+        # Will retrieve the next avaliable index of a task
+        for days in listSche:
+            taskindex = listSche[days].keys()
+            for index in taskindex:
+                if days == date:
+                    count.append(int(index.split()[1]))
+        count.sort()
+
+        if len(count) == 0:
+            taskno = 1
+        elif min(count) > 1:
+            taskno = min(count)-1
+        elif(len(count) != max(count)):
+            for i in range(max(count)):
+                if i+1 != count[i]:
+                    taskno = i+1
+                    break
+        else:
+            taskno = max(count)+1
+        
+        newtask = "Task %d" % taskno
+
+        return newtask
+
+    
+    def checkAll(self, task):
+        taskType = task.type
+
+        if self.checkDate(task.date) and self.checkName(task.name) and self.checkType(taskType) and self.validDuration(task.duration) and self.validTime(task.startTime):
+            if taskType == "Recurring Task":
+                if self.checkFreq(task.frequency) and self.checkDate(task.endDate):
+                    return True
+            return True
+        else:
+            return False

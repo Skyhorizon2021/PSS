@@ -1,60 +1,68 @@
-import sqlite3
 from Schedule import *
 from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
-import datetime
 from Checking import *
 import pymongo
 
 class PSS:
 
-    @staticmethod
-    def createTask():
-        print("Select the type of task:\n1. Recurring\n2. Transcient\n3. Recurring")
-        selection = input(int())
-        match selection:
-            case 1:
-                # Entering parameters
-                name = input("Enter the name of the task: ")
-                taskType = "Recurring Task"
-                start = input(float("Enter the task's start time: "))
-                duration = input(float("Enter the task's duration: "))
-                startDate = input(float("Enter the task's start date: "))
-                endDate = input(int("Enter the task's end date: "))
-                frequency = input(int("Enter the task's frequency: "))
-                
-                # Creating recurring task
-                reTask = Recurring(name, start, duration, startDate, taskType,
-                endDate, frequency)
-                if Checking.noOverlap(reTask):
-                    return reTask
+    def createTask(self, task):
+        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+
+        mydb = myclient["schedule"]
+        mycol = mydb["tasks"]
+
+        mod = Checking()
+        if not mod.checkAll(task):
+            print("Invalid Attributes")
+            return False
+
+        newSche = Schedule.getData()
+
+        taskType = task.type
+        date = str(task.date)
+
+        # Task creation
+        match taskType:
+            case "Recurring Task":
+                # Get dates for recurring objects to be placed in
+                dates = mod.iterateDate(task.date, task.endDate, task.frequency)
+                if mod.noOverlapAdd(task):
+                    for days in dates:
+                        newIndex = mod.getTaskIndex(days)
+                        newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration,
+                                "EndDate":task.endDate, "Frequency":task.frequency}
+                        try: # Adds Recurring to Existing day
+                            newSche[str(days)][newIndex] = newdict
+                        except: # Creates a new day to add a recurring task
+                            newSche[str(days)] = {newIndex : {}}
+                            newSche[str(days)][newIndex] = newdict
+                        task.date = days
+                    mycol.replace_one({}, newSche)    
                 else:
-                    print("Task creation failed...")
-            
-            case 2:
-                # Entering parameters
-                name = input("Enter the name of the task: ")
-                taskType = "Transcient Task"
-                start = input(float("Enter the task's start time: "))
-                duration = input(float("Enter the task's duration: "))
-                date = input(int("Enter the task's date: "))
+                    print("A task exists during this period")
 
-                # Creating transient task
-                trTask = Transient(name, start, duration, date, taskType)
-                return trTask
-            case 3:
-                # Entering parameters
-                name = input("Enter the name of the task: ")
-                taskType = "Anti Task"
-                start = input(float("Enter the task's start time: "))
-                duration = input(float("Enter the task's duration: "))
-                date = input(int("Enter the task's date: "))
+            case "Transient Task":
+                if mod.noOverlapAdd(task):
+                    newIndex = mod.getTaskIndex(days)
+                    newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
+                    try:
+                        newSche[date][newIndex] = newdict
+                    except:
+                        newSche[date] = {newIndex : {}}
+                        newSche[date][newIndex] = newdict
+                else:
+                    print("Task exists during this period")
 
-                # Creating anti task
-                anTask = Anti(name, start, duration, date, taskType)
-                return anTask
-
+            case "Anti Task":
+                if mod.checkRecurring(task):
+                    newIndex = mod.getTaskIndex(days)
+                    newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
+                    newSche[date][newIndex] = newdict
+                else:
+                    print("Recurring Task does not exist")
+        return True
 
     def viewTask():
         name = input("Enter the task name: ")
@@ -151,17 +159,46 @@ class PSS:
                     del tempSche[date]
                 mycol.replace_one(query, tempSche)
 
-    def editTask():
-        # Check for task name
+    def editTask(self, oldtask, newtask):
+        mod = Checking()
+               
+        taskType = newtask.type
+        name = newtask.name
+        date = newtask.date
+        time = mod.convertTime(newtask.time)
+        duration = newtask.duration
+        if taskType == "Recurring":
+            end = newtask.endDate
+            freq = newtask.frequency
 
-        # Display current attributes
+        # Remove old task for checking
+        self.deleteTask(oldtask.name)
 
-        # Make changes to attributes
-
-        # Verify that there is not overlap nor invalid changes
-
-        # Confirm edits
-        pass
+        # Checks all values for validity 
+        if mod.checkName(name) and mod.checkDate(date) and mod.checkDate(end) and mod.validDuration(duration) and mod.validTime(time) and mod.checkFreq(freq) and mod.checkType(taskType):
+            match taskType:
+                # Checks all types of tasks for overlap and (re)creates tasks if no overlap
+                case "Transient Task":
+                    checkingtask = Transient(name, time, duration, date, taskType)
+                    if mod.noOverlapAdd(checkingtask):
+                        self.createTask(newtask)
+                    else:
+                        self.createTask(oldtask)
+                case "Recurring Task":
+                    checkingtask = Recurring(name, time, duration, date, taskType, end, freq)
+                    if mod.noOverlapAdd(checkingtask):
+                        self.createTask(newtask)
+                    else:
+                        self.createTask(oldtask)
+                case "Anti Task":
+                    checkingtask = Anti(name, time, duration, date, taskType)
+                    if mod.noOverlapAdd(checkingtask):
+                        self.createTask(newtask)
+                    else:
+                        self.createTask(oldtask)
+        else:
+            # Unspecified Task Error
+            print("Error in task's value")
 
     def writeToFile():
         filename = input("Enter a file name: ")
@@ -240,5 +277,7 @@ class PSS:
         pass
 # Just written down the required methods from our PSS diagrams
 
+testtask = Recurring("Sample Test 1", "10:15:00", ".75", "20240217", "Recurring Task", "20240415", "7")
+
 sched = PSS()
-sched.deleteTask("C")
+sched.createTask(testtask)
