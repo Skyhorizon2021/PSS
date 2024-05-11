@@ -121,11 +121,16 @@ class Checking:
         else:
             pass
 
-        # Returns proper iterated date
-        if day[1] < 10:
-            return int(str(day[0])+"0"+str(day[1])+str(day[2]))
+        # Returns proper iterated month
+        if day[1] < 10 and day[2] < 10:
+            return int(str(day[0]) + "0"+str(day[1]) + "0" + str(day[2]))
+        elif day[1] < 10:
+            return int(str(day[0]) + "0"+str(day[1]) + str(day[2]))
+        elif day[2] < 10:
+            return int(str(day[0]) + str(day[1]) + "0" + str(day[2]))
         else:
-            return int(str(day[0])+str(day[1])+str(day[2]))
+            return int(str(day[0]) + str(day[1])+str(day[2]))
+        
 
     # Check if tasks overlap
     def noOverlapAdd(self, task):
@@ -397,6 +402,10 @@ class Checking:
     def hideAnti(self, date):
         listSche = Schedule.getData()
         tempSche = Schedule.getData()
+        try:
+            x = listSche[date]
+        except:
+            return None
 
         for tasks in listSche[date]:
             y = listSche[date][tasks]

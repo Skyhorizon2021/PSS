@@ -5,6 +5,7 @@ from Models.AntiTaskModel import Anti
 from Checking import *
 import pymongo
 from bson.json_util import dumps
+import calendar
 
 class PSS:
 
@@ -221,7 +222,7 @@ class PSS:
     def readFromFile(filename):
         Schedule.loadData(filename)
 
-    def viewDaySchedule(date):
+    def viewDaySchedule(self, date):
         mod = Checking()
 
         listSche = mod.hideAnti(date)
@@ -253,30 +254,49 @@ class PSS:
                     sortedSchedule.append(tempSche[date][tasks])
                 i += 1
         except:
-            # Day does not exists
-            print("Day Schedule does not exist")
-        print(sortedSchedule)
-        return sortedSchedule
+            # Day does not exists and will not add to added
+            pass
+        if sortedSchedule != []:
+            return {date : sortedSchedule}
+        else:
+            return None
 
-    def viewWeekSchedule():
-        # Checks for file name
+    def viewWeekSchedule(self, date):
+        mod = Checking()
+        sortedWeek = []
 
-        # Checks for start date
+        # Appends a day's schedule to the week schedule
+        # Will not load days without tasks
+        for i in range(7):
+            nextday =str(mod.formatDate(str(int(date)+i)))
+            sortedDay = self.viewDaySchedule(nextday)
+            if sortedDay != None:
+                sortedWeek.append(sortedDay)
 
-        # Check for antitasks (no display purposes)
+        return sortedWeek
 
-        # Loop for 7 days, print out day schedule
-        pass
+    def viewMonthSchedule(self, date):
+        mod = Checking()
+        sortedMonth = []
+        day = mod.separateDate(date)
 
-    def viewMonthSchedule():
-        # Checks for file name
+        endOfMonth = calendar.monthrange(day[0], day[1])[1]
+        # Formats month if less than 10 and returns them to the start of the month for iteration
+        if day[1] < 10:
+            newDate = str(day[0]) + "0" + str(day[1]) + "01"
+        else:
+            newDate = str(day[0]) + str(day[1]) + "01"
 
-        # Checks for start of the month
-
-        # Check for antitasks (no display purposes)
-
-        # Loop for 30 days, print out day schedule
-        pass
+        # Appends a day's schedule to the week schedule
+        # Will not load days without tasks
+        for i in range(endOfMonth):
+            nextday =str(mod.formatDate(str(int(newDate)+i)))
+            sortedDay = self.viewDaySchedule(nextday)
+            if sortedDay != None:
+                sortedMonth.append(sortedDay)
+        
+        print(sortedMonth)
+        return sortedMonth
 
     def writeDaySchedule(filename):
         # Checks for file name
@@ -311,6 +331,6 @@ class PSS:
 # Just written down the required methods from our PSS diagrams
 
 #checkingTask = Anti("Cancellation 2", "11:15:00", ".75", "20240217", "Anti Task")
-#x = PSS()
+x = PSS()
 #x.createTask(checkingTask)
-PSS.viewDaySchedule("20240217")
+x.viewMonthSchedule("20240320")
