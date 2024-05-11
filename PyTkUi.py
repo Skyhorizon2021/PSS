@@ -134,9 +134,9 @@ class CreateWindow(tk.Toplevel):
         duration = self.entry_duration.get()
 
         # Retrieve date fields
-        day = self.entry_day.get()
-        month = self.entry_month.get()
-        year = self.entry_year.get()
+        day = int(self.entry_day.get())
+        month = int(self.entry_month.get())
+        year = int(self.entry_year.get())
 
         task = Task(task_name, task_type, start_time, duration, day, month, year)
         # Message box confirming task submission
@@ -261,13 +261,13 @@ class RecurringTaskWindow(CreateWindow):
 
     def submit_task(self):
         super().submit_task()
-        start_day = self.entry_start_day.get()
-        start_month = self.entry_start_month.get()
-        start_year = self.entry_start_year.get()
-        end_day = self.entry_end_day.get()
-        end_month = self.entry_end_month.get()
-        end_year = self.entry_end_year.get()
-        frequency = self.entry_frequency.get()
+        start_day = int(self.entry_start_day.get())
+        start_month = int(self.entry_start_month.get())
+        start_year = int(self.entry_start_year.get())
+        end_day = int(self.entry_end_day.get())
+        end_month = int(self.entry_end_month.get())
+        end_year = int(self.entry_end_year.get())
+        frequency = int(self.entry_frequency.get())
         task = Task(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get(), start_day, start_month, start_year, end_day, end_month, end_year, frequency)
         messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Date: {start_day}/{start_month}/{start_year}\nEnd Date: {end_day}/{end_month}/{end_year}\nFrequency: {frequency}")
 
