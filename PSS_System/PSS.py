@@ -295,42 +295,87 @@ class PSS:
             if sortedDay != None:
                 sortedMonth.append(sortedDay)
         
-        print(sortedMonth)
         return sortedMonth
 
-    def writeDaySchedule(filename):
-        # Checks for file name
+    def writeDaySchedule(self, filename, date):
+        mod = Checking()
 
-        # Checks for start date
+        listSche = mod.hideAnti(date)
+        tempSche = mod.hideAnti(date)
+        
+        sortedTasks = []
+        sortedSchedule = []
+        try:
+            while listSche[date] != {}:
+                minTime = 24
+                for tasks in listSche[date]:
+                    start = mod.convertTime(listSche[date][tasks]['Time'])
+                    # Gets the earliest start time
+                    if start < minTime:
+                        minTime = start
+                        selectTask = tasks
+                    #if listSche[date][tasks]['Task Type'] == "Recurring Task":
+                        #mycol.replace_one()
+                # Deletes the earliest task for iteration
+                del listSche[date][selectTask]
+                # Appends if task's time is the earliest
+                for tasks in tempSche[date]:
+                        if mod.convertTime(tempSche[date][tasks]['Time']) == minTime:
+                            sortedTasks.append(tasks)
+                            break
+            
+            # Returns the task objects in a sorted array
+            i = 0
+            for tasks in sortedTasks:
+                if tasks == sortedTasks[i]:
+                    sortedSchedule.append(tempSche[date][tasks])
+                i += 1
+            
+            for detail in sortedSchedule:
+                del detail['EndDate']
+                del detail['Frequency']
 
-        # Check for antitasks (no display purposes)
+        except:
+            # Day does not exists and will not add to added
+            pass
+        
+        # Print to file
+        try:
+            with open(filename, 'w') as jsonfile:
+                json.dump({date : sortedSchedule}, jsonfile)
+        except FileNotFoundError:
+            print("File does not exist")
 
-        # Write day schedule to file
-        pass
+    def writeWeekSchedule(self, filename, date):
+        mod = Checking()
 
-    def writeWeekSchedule():
-        # Checks for file name
+        # Appends a day's schedule to the week schedule
+        # Will not load days without tasks
+        for i in range(7):
+            nextday =str(mod.formatDate(str(int(date)+i)))
+            self.writeDaySchedule(filename, nextday)
 
-        # Checks for start date
+    def writeMonthSchedule(self, filename, date):
+        mod = Checking()
+        
+        day = mod.separateDate(date)
 
-        # Check for antitasks (no display purposes)
+        endOfMonth = calendar.monthrange(day[0], day[1])[1]
+        # Formats month if less than 10 and returns them to the start of the month for iteration
+        if day[1] < 10:
+            newDate = str(day[0]) + "0" + str(day[1]) + "01"
+        else:
+            newDate = str(day[0]) + str(day[1]) + "01"
 
-        # Loop for 7 days, write day schedule to file
-        pass
-
-    def writeMonthSchedule():
-        #
-        #  Checks for file name
-
-        # Checks for start of the month
-
-        # Check for antitasks (no display purposes)
-
-        # Loop for 30 days, write day schedule to file
-        pass
+        # Appends a day's schedule to the week schedule
+        # Will not load days without tasks
+        for i in range(endOfMonth):
+            nextday =str(mod.formatDate(str(int(newDate)+i)))
+            self.writeDaySchedule(filename, nextday)
+        
 # Just written down the required methods from our PSS diagrams
 
-#checkingTask = Anti("Cancellation 2", "11:15:00", ".75", "20240217", "Anti Task")
+#checkingTask = Recurring("Sample Test 2", "06:15:00", ".5", "20240217", "Recurring Task", "20240220", "1")
 x = PSS()
 #x.createTask(checkingTask)
-x.viewMonthSchedule("20240320")
+x.writeDaySchedule("Nada", "20240217")
