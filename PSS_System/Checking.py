@@ -130,7 +130,6 @@ class Checking:
             return int(str(day[0]) + str(day[1]) + "0" + str(day[2]))
         else:
             return int(str(day[0]) + str(day[1])+str(day[2]))
-        
 
     # Check if tasks overlap
     def noOverlapAdd(self, task):

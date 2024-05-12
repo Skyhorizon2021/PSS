@@ -357,7 +357,7 @@ class PSS:
 
     def writeMonthSchedule(self, filename, date):
         mod = Checking()
-        
+
         day = mod.separateDate(date)
 
         endOfMonth = calendar.monthrange(day[0], day[1])[1]
@@ -372,10 +372,3 @@ class PSS:
         for i in range(endOfMonth):
             nextday =str(mod.formatDate(str(int(newDate)+i)))
             self.writeDaySchedule(filename, nextday)
-        
-# Just written down the required methods from our PSS diagrams
-
-#checkingTask = Recurring("Sample Test 2", "06:15:00", ".5", "20240217", "Recurring Task", "20240220", "1")
-x = PSS()
-#x.createTask(checkingTask)
-x.writeDaySchedule("Nada", "20240217")
