@@ -13,20 +13,20 @@ class MenuBar():
 
         #Display Menu
         display = tk.Menu(menubar, tearoff=0)
-        display.add_command(label="Show Day", command=self.show_day)
-        display.add_command(label="Show Week", command=self.donothing)
-        display.add_command(label="Show Month", command=self.donothing)
+        display.add_command(label="Show Day", command=lambda: self.show(0))
+        display.add_command(label="Show Week", command=lambda: self.show(1))
+        display.add_command(label="Show Month", command=lambda: self.show(2))
         menubar.add_cascade(label="Display", menu=display)
 
         #File Menu
         file = tk.Menu(menubar, tearoff=0)
-        file.add_command(label="Open JSON File", command=self.upload_file)
+        file.add_command(label="Open JSON File", command=lambda: self.upload_file())
         file.add_command(label="Save to JSON File", command=self.donothing)
         menubar.add_cascade(label="File", menu=file)
 
         #Edit Menu
         edit = tk.Menu(menubar, tearoff=0)
-        edit.add_command(label="Create Recurring Task", command=self.create_recur)
+        edit.add_command(label="Create Recurring Task", command=lambda: self.create_recur())
         edit.add_command(label="Create Transient Task", command=self.donothing)
         edit.add_command(label="Create Anti-Task", command=self.donothing)
         edit.add_command(label="Edit Task", command=self.donothing)
@@ -43,8 +43,8 @@ class MenuBar():
     def create_recur(self):
         self.new_window = CreateWindow()
     
-    def show_day(self):
-        self.new_window = DayWindow(self.window)
+    def show(self, type):
+        self.new_window = DisplayWindow(self.window, type)
         
 
 class CreateWindow(Toplevel):
@@ -120,18 +120,22 @@ class FileWindow(Toplevel):
         self.file_name = tk.Label(self, text="File name: " + filename)
         print('Selected: ', filename)
 
-class DayWindow(Toplevel):
-    def __init__(self, parent, master=None):
+class DisplayWindow(Toplevel):
+    def __init__(self, parent, type, master=None):
         super().__init__(master=master)
         self.title("Schedule Display")
         self.geometry("400x200")
         self.date = ""
         self.parent = parent
+        self.type = type
     
         self.frame=Frame(self)
         self.frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-
-        self.label = tk.Label(self.frame, text="Day to Display (in YYYYMMDD):")
+    
+        if type == 0:
+            self.label = Label(self.frame, text="Day to Display (YYYYMMDD):")
+        else:
+            self.label = Label(self.frame, text="Start Day (YYYYMMDD):")
         self.entry = tk.Entry(self.frame)
 
         self.label.pack()
@@ -143,33 +147,20 @@ class DayWindow(Toplevel):
     def submit(self):
         day = self.entry.get()
         #schedule = PSS.viewDaySchedule(date)
-        new_frame = DayFrame(self.parent)
+        new_frame = ScheduleFrame(self.parent, self.type)
         self.parent.place_frame(new_frame)
         self.destroy()
 
-class DayFrame(tk.Frame):
-    def __init__(self, parent):
+class ScheduleFrame(tk.Frame):
+    def __init__(self, parent, type):
         tk.Frame.__init__(self, parent)
-        self.label = Label(self, text="Temp Label")
+        if type == 0:
+            self.label = Label(self, text="This will show day")
+        elif type == 1:
+            self.label = Label(self, text="This will show week")
+        elif type == 2:
+            self.label = Label(self, text="This will show month")
         self.label.pack()
-
-class WeekFrame(tk.Frame):
-    def __init__(self, parent):
-        tk.Frame.__init__(self, parent)
-        self.label = Label(self, text="Temp Label")
-        self.label.pack()
-
-class MonthFrame(tk.Frame):
-    def __init__(self, parent):
-        tk.Frame.__init__(self, parent)
-        self.label = Label(self, text="Temp Label")
-        self.label.pack()
-
-
-#def main():
-#    root = tk.Tk()
-#    app = MenuWindow(root)
-#    root.mainloop()
 
 class MainWindow(tk.Tk):
     def __init__(self):
@@ -181,7 +172,7 @@ class MainWindow(tk.Tk):
 
         default = Frame(self)
         self.place_frame(default)
-        label = Label(default, text="hello")
+        label = Label(default, text="Default Screen")
         label.pack()
 
     def place_frame(self, frame):
