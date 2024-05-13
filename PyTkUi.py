@@ -7,52 +7,45 @@ from tkinter import filedialog
 class MenuBar():
     def __init__(self, window):
         #Menu
-        window = window
         self.window = window
-        
-        self.menubar = tk.Menu(self.window)
-        self.window.config(menu=self.menubar)
-
-        DefaultFrame = Frame(window)
+        menubar = tk.Menu(window)
+        window.config(menu=menubar)
 
         #Display Menu
-        display = tk.Menu(self.menubar, tearoff=0)
-        display.add_command(label="Show Day", command=self.show_day(DefaultFrame, window))
+        display = tk.Menu(menubar, tearoff=0)
+        display.add_command(label="Show Day", command=self.show_day)
         display.add_command(label="Show Week", command=self.donothing)
         display.add_command(label="Show Month", command=self.donothing)
-        self.menubar.add_cascade(label="Display", menu=display)
+        menubar.add_cascade(label="Display", menu=display)
 
         #File Menu
-        file = tk.Menu(self.menubar, tearoff=0)
+        file = tk.Menu(menubar, tearoff=0)
         file.add_command(label="Open JSON File", command=self.upload_file)
         file.add_command(label="Save to JSON File", command=self.donothing)
-        self.menubar.add_cascade(label="File", menu=file)
+        menubar.add_cascade(label="File", menu=file)
 
         #Edit Menu
-        edit = tk.Menu(self.menubar, tearoff=0)
-        edit.add_command(label="Create Recurring Task", command=self.create_task)
+        edit = tk.Menu(menubar, tearoff=0)
+        edit.add_command(label="Create Recurring Task", command=self.create_recur)
         edit.add_command(label="Create Transient Task", command=self.donothing)
         edit.add_command(label="Create Anti-Task", command=self.donothing)
         edit.add_command(label="Edit Task", command=self.donothing)
         edit.add_separator()
         edit.add_command(label="Delete Task", command=self.donothing)
-        self.menubar.add_cascade(label="Edit", menu=edit)
-
-        #WeekFrame(DefaultFrame, window).pack()
+        menubar.add_cascade(label="Edit", menu=edit)
 
     def donothing(self):
         print()
 
     def upload_file(self):
-        newWindow = FileWindow()
+        self.new_window = FileWindow()
 
-    def create_task(self):
-        newWindow = CreateWindow()
-
-    def show_day(self, parentFrame, parentTk):
-        new_window = DayWindow()
-        new = DayFrame(parentFrame, parentTk)
-        new.pack()
+    def create_recur(self):
+        self.new_window = CreateWindow()
+    
+    def show_day(self):
+        self.new_window = DayWindow(self.window)
+        
 
 class CreateWindow(Toplevel):
     def __init__(self, master=None):
@@ -128,47 +121,49 @@ class FileWindow(Toplevel):
         print('Selected: ', filename)
 
 class DayWindow(Toplevel):
-    def __init__(self, master=None):
+    def __init__(self, parent, master=None):
         super().__init__(master=master)
         self.title("Schedule Display")
         self.geometry("400x200")
+        self.date = ""
+        self.parent = parent
     
-        frame=Frame(self)
-        frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.frame=Frame(self)
+        self.frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        self.label = tk.Label(frame, text="Day to Display:")
-        self.entry = tk.Entry(frame)
+        self.label = tk.Label(self.frame, text="Day to Display (in YYYYMMDD):")
+        self.entry = tk.Entry(self.frame)
 
         self.label.pack()
         self.entry.pack()
 
-        self.button = tk.Button(frame, text="Submit", command=self.submit)
+        self.button = tk.Button(self.frame, text="Submit", command=self.submit)
         self.button.pack()
 
     def submit(self):
-        
-
-#class DefaultFrame(tk.Frame):
-#    def __init__(self, parent, controller):
-#        tk.Frame.__init__(self, parent)
-#        self.controller = controller
+        day = self.entry.get()
+        #schedule = PSS.viewDaySchedule(date)
+        new_frame = DayFrame(self.parent)
+        self.parent.place_frame(new_frame)
+        self.destroy()
 
 class DayFrame(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.controller = controller
         self.label = Label(self, text="Temp Label")
         self.label.pack()
 
 class WeekFrame(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.controller = controller
+        self.label = Label(self, text="Temp Label")
+        self.label.pack()
 
 class MonthFrame(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.controller = controller
+        self.label = Label(self, text="Temp Label")
+        self.label.pack()
 
 
 #def main():
@@ -182,14 +177,16 @@ class MainWindow(tk.Tk):
         self.title("Personal Scheduling System (PSS)")
         self.geometry("700x500")
 
-        #container = tk.Frame(self)
-        #page = DefaultFrame(parent=container, controller=self)
         menubar = MenuBar(self)
-    
-    #def show_frame(self, page_name):
-    #    '''Show a frame for the given page name'''
-    #    frame = self.frames[page_name]
-    #    frame.tkraise()
+
+        default = Frame(self)
+        self.place_frame(default)
+        label = Label(default, text="hello")
+        label.pack()
+
+    def place_frame(self, frame):
+        frame.grid(row=0, column=0, sticky="nsew")
+        frame.tkraise()
         
 
 if __name__ == "__main__":
