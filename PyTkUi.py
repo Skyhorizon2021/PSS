@@ -134,8 +134,10 @@ class DisplayWindow(Toplevel):
     
         if type == 0:
             self.label = Label(self.frame, text="Day to Display (YYYYMMDD):")
-        else:
-            self.label = Label(self.frame, text="Start Day (YYYYMMDD):")
+        elif type == 1:
+            self.label = Label(self.frame, text="Starting Date for Week to Display (YYYYMMDD):")
+        elif type == 2:
+            self.label = Label(self.frame, text="Starting Date for Month to Display (YYYYMMDD):")
         self.entry = tk.Entry(self.frame)
 
         self.label.pack()
@@ -147,19 +149,19 @@ class DisplayWindow(Toplevel):
     def submit(self):
         day = self.entry.get()
         #schedule = PSS.viewDaySchedule(date)
-        new_frame = ScheduleFrame(self.parent, self.type)
+        new_frame = ScheduleFrame(self.parent, self.type, day)
         self.parent.place_frame(new_frame)
         self.destroy()
 
 class ScheduleFrame(tk.Frame):
-    def __init__(self, parent, type):
+    def __init__(self, parent, type, day):
         tk.Frame.__init__(self, parent)
         if type == 0:
-            self.label = Label(self, text="This will show day")
+            self.label = Label(self, text="This will show day " + day)
         elif type == 1:
-            self.label = Label(self, text="This will show week")
+            self.label = Label(self, text="This will show week " + day)
         elif type == 2:
-            self.label = Label(self, text="This will show month")
+            self.label = Label(self, text="This will show month " + day)
         self.label.pack()
 
 class MainWindow(tk.Tk):
