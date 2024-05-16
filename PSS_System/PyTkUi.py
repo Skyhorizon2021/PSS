@@ -208,29 +208,6 @@ class CreateWindow(tk.Toplevel):
         # Message box confirming task submission
         messagebox.showinfo("Task Submitted", f"Task '{task_name}' submitted successfully!")
 
-    def recurring(self):
-        self.label_end_date = tk.Label(self, text="End Date (YYYYMMDD):")
-        self.label_frequency = tk.Label(self, text="Frequency (1 daily or 7 weekly):")
-
-        self.entry_end_date = tk.Entry(self)
-        self.entry_frequency = tk.Entry(self)
-
-        self.label_task_name.grid(row=0, column=0, sticky="e", pady=5)
-        self.label_start_time.grid(row=1, column=0, sticky="e", pady=5)
-        self.label_duration.grid(row=2, column=0, sticky="e", pady=5)
-        self.label_date.grid(row=3, column=0, sticky="e", pady=5)
-
-        self.entry_task_name.grid(row=0, column=1)
-        self.entry_start_time.grid(row=1, column=1)
-        self.entry_duration.grid(row=2, column=1)
-        self.entry_date.grid(row=3, column=1)
-
-        self.label_end_date.grid(row=4, column=0, sticky="e", pady=5)
-        self.entry_end_date.grid(row=4, column=1)
-        self.label_frequency.grid(row=5, column=0, sticky="e", pady=5)
-        self.entry_frequency.grid(row=5, column=1)
-        self.button_submit.grid(row=6, columnspan=2, pady=8)
-
 class TransientTaskWindow(CreateWindow):
     def __init__(self, master=None):
         super().__init__(master=master)
