@@ -79,6 +79,8 @@ class FileWindow(Toplevel):
         self.button.place(relx=.5, rely=.5, anchor = CENTER)
 
     def upload(self):
+        #use PSS to call readFromFile function
+
         filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
         self.file_name = tk.Label(self, text="File name: " + filename)
         print('Selected: ', filename)
@@ -113,7 +115,6 @@ class DisplayWindow(Toplevel):
 
     def submit(self):
         day = self.entry.get()
-        #schedule = PSS.viewDaySchedule(date)
         new_frame = ScheduleFrame(self.parent, self.type, day)
         self.parent.place_frame(new_frame)
         self.destroy()
@@ -121,6 +122,9 @@ class DisplayWindow(Toplevel):
 class ScheduleFrame(tk.Frame):
     def __init__(self, parent, type, day):        
         tk.Frame.__init__(self, parent)
+
+        #use PSS to display using viewDaySchedule, viewWeekSchedule, viewMonthSchedule
+
         if type == 0:
             self.label = Label(self, text="This will show day " + day)
         elif type == 1:
@@ -135,7 +139,7 @@ class CreateWindow(tk.Toplevel):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Task")
-        self.geometry("400x300")  # Increased height to accommodate new fields
+        self.geometry("400x300")
 
         frame = Frame(self)
         frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
@@ -346,7 +350,6 @@ class FindWindow(tk.Toplevel):
         self.entry.destroy()
         self.button.destroy()
         self.show.place(relx=.5, rely=.3, anchor = CENTER)
-
 
 class MainWindow(tk.Tk):
     def __init__(self):
