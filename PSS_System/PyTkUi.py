@@ -169,14 +169,12 @@ class CreateWindow(tk.Toplevel):
 
         # Labels
         self.label_task_name = tk.Label(frame, text="Task Name:")
-        self.label_task_type = tk.Label(frame, text="Task Type:")
         self.label_start_time = tk.Label(frame, text="Start Time (HH:MM):")
         self.label_duration = tk.Label(frame, text="Duration (minutes):")
         self.label_date = tk.Label(frame, text="Date (DDMMYYYY):")
 
         # Entries
         self.entry_task_name = tk.Entry(frame)
-        self.entry_task_type = tk.Entry(frame)
         self.entry_start_time = tk.Entry(frame)
         self.entry_duration = tk.Entry(frame)
         self.entry_date = tk.Entry(frame)
@@ -202,7 +200,6 @@ class CreateWindow(tk.Toplevel):
     def submit_task(self):
         # Retrieve task details from entries
         task_name = self.entry_task_name.get()
-        task_type = self.entry_task_type.get()
         start_time = self.entry_start_time.get()
         duration = self.entry_duration.get()
 
@@ -219,8 +216,9 @@ class TransientTaskWindow(CreateWindow):
         self.title("Create Transient Task")
 
     def submit_task(self):
+        self.task_type= "Transient Task"
         super().submit_task()
-        task = Transient(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get())
+        task = Transient(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
         messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class AntiTaskWindow(CreateWindow):
@@ -229,8 +227,9 @@ class AntiTaskWindow(CreateWindow):
         self.title("Create Anti Task")
 
     def submit_task(self):
+        self.task_type = "Anti Task"
         super().submit_task()
-        task = Anti(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get())
+        task = Anti(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
         messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class RecurringTaskWindow(CreateWindow):
@@ -252,8 +251,9 @@ class RecurringTaskWindow(CreateWindow):
         self.button_submit.grid(row=7, columnspan=2, pady=8)
 
     def submit_task(self):
+        self.task_type = "Recurring Task"
         super().submit_task()
-        task = Recurring(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_end_date.get(), self.entry_frequency.get())
+        task = Recurring(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get(), self.entry_end_date.get(), self.entry_frequency.get())
         messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
 
 class EditWindow(Toplevel):
