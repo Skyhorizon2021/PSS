@@ -68,9 +68,8 @@ class PSS:
                     print("Recurring Task does not exist")
         return True
 
-    def viewTask():
-        #name = input("Enter the task name: ")
-        name = ""
+    def viewTask(name):
+     
         listSche = Schedule.getData()
         found = False
         
