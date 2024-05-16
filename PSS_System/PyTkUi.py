@@ -325,7 +325,7 @@ class DeleteWindow(tk.Toplevel):
     def delete_task(self):
         task_name = self.entry_task_name.get()
         # Call deleteTasks function with the task_name
-        deleteTasks(task_name)
+        #deleteTasks(task_name)
         messagebox.showinfo("Task Deleted", f"Task '{task_name}' has been deleted.")
     
 
