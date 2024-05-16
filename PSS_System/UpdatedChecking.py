@@ -172,9 +172,6 @@ class UpdatedChecking:
                     # Checks if the task is enveloped by another task
                     elif taskStart > time and taskEnd < total:
                         return False
-                    # Checks if current task matches Anti with Recurring
-                    elif issubclass(type(task), Anti) and taskStart == time and taskEnd == total and detail['Task Type'] != "Recurring Task":
-                        return False
                     # Checks if task is the exact time slot as another task
                     elif taskStart == time and taskEnd == total:
                         return False
@@ -184,14 +181,67 @@ class UpdatedChecking:
         # Validates if all checks fail
         return True
 
+    # Check if antitasks deletion overlap
+    def noOverlapAdd(self, task):
+        listsche = Schedule.getData()
+        
+        # Retrieve Task's start date, start time,  and duration, and calculates its end time
+        start = task['Date']
+        taskStart = task['StartTime']
+        taskDuration = task['Duration']
+        taskEnd = taskStart + taskDuration
+
+        # Gets all tasks for the days
+        try:
+                for ntask in listsche:
+                    # Checks if recurring type to get start and end dates, and frequency
+                    if issubclass(type(ntask), Recurring):
+                        end = ntask['EndDate']
+                        frequency = ntask['Frequency']
+                    else:
+                        end = start
+                        frequency = 1
+
+                        # Should get every date that a task is recurring on and dates around it
+                        dates = self.iterateDate(start, end, frequency)
+
+                        # Get times for each tasks
+                        time = ntask['StartTime']
+                        duration = ntask['Duration']
+
+                        # End Time
+                        total = time  + duration
+                        
+                        # Checks if the tasks start during another task
+                        if taskStart > time and taskStart < total and taskEnd > total:
+                            return False
+                        # Checks if the task ends during another task
+                        elif taskStart < time and taskEnd < total and taskEnd > time:
+                            return False
+                        # Checks if the task envelopes another task
+                        elif taskStart < time and taskEnd > total:
+                            return False
+                        # Checks if the task is enveloped by another task
+                        elif taskStart > time and taskEnd < total:
+                            return False
+                        # Checks if current task matches Anti with Recurring
+                        elif issubclass(type(task), Anti) and taskStart == time and taskEnd == total and detail['Task Type'] != "Recurring Task":
+                            return False
+
+        except:
+                pass
+
+        # Validates if all checks fail
+        return True
+
     # Checks if any recurring tasks have an antitask (for deleting recurring task)
-    def checkAnti(self, task):
+    def checkAnti(self, antitask):
         listSche = Schedule.getData()
 
-        date = task.date
+        date = antitask['Date']
 
         for task in listSche:
-            if task['StartTime'] == task.startTime and task.duration == task['Duration']:
+            if task['StartTime'] == antitask['StartTime'] and antitask['Duration'] == task['Duration']:
                 return task['Name']
 
         return ""
@@ -247,8 +297,21 @@ class UpdatedChecking:
         return listSche
         
 
-    def isRecurring(self, task):
+    def isRecurring(task):
         if task['Type'] in ["Study", "Class", "Sleep", "Exercise", "Work", "Meal"]:
             return True
-x = UpdatedChecking()
-x.checkName("A")
+        else:
+            return False
+
+    def isAnti(task):
+        if task['Type'] == "Cancellation":
+            return True
+        else:
+            return False
+
+    def isTran(task):
+        if task['Type'] in ["Visit", "Shopping", "Appointment"]:
+            return True
+        else:
+            return False
+    
