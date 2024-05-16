@@ -274,7 +274,7 @@ class EditWindow(Toplevel):
         #task = PSS.viewTask(self.entry.get())
         #turn task into a string, assign to output, else give error
         task = ""
-        utput = ""
+        output = ""
         print(self.entry.get())
 
         self.label = Label(self, text=output)
