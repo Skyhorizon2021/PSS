@@ -17,9 +17,7 @@ class UpdatedChecking:
             return False
     
     # Validates a unique name
-    def checkName(self, name):
-        names = []
-        
+    def checkName(self, name):       
         # Retrieves and validate schedule
         listsche = Schedule.getData()
 
@@ -174,9 +172,6 @@ class UpdatedChecking:
                     # Checks if the task is enveloped by another task
                     elif taskStart > time and taskEnd < total:
                         return False
-                    # Checks if current task matches Anti with Recurring
-                    elif issubclass(type(task), Anti) and taskStart == time and taskEnd == total and detail['Task Type'] != "Recurring Task":
-                        return False
                     # Checks if task is the exact time slot as another task
                     elif taskStart == time and taskEnd == total:
                         return False
@@ -186,14 +181,67 @@ class UpdatedChecking:
         # Validates if all checks fail
         return True
 
+    # Check if antitasks deletion overlap
+    def noOverlapAdd(self, task):
+        listsche = Schedule.getData()
+        
+        # Retrieve Task's start date, start time,  and duration, and calculates its end time
+        start = task['Date']
+        taskStart = task['StartTime']
+        taskDuration = task['Duration']
+        taskEnd = taskStart + taskDuration
+
+        # Gets all tasks for the days
+        try:
+                for ntask in listsche:
+                    # Checks if recurring type to get start and end dates, and frequency
+                    if issubclass(type(ntask), Recurring):
+                        end = ntask['EndDate']
+                        frequency = ntask['Frequency']
+                    else:
+                        end = start
+                        frequency = 1
+
+                        # Should get every date that a task is recurring on and dates around it
+                        dates = self.iterateDate(start, end, frequency)
+
+                        # Get times for each tasks
+                        time = ntask['StartTime']
+                        duration = ntask['Duration']
+
+                        # End Time
+                        total = time  + duration
+                        
+                        # Checks if the tasks start during another task
+                        if taskStart > time and taskStart < total and taskEnd > total:
+                            return False
+                        # Checks if the task ends during another task
+                        elif taskStart < time and taskEnd < total and taskEnd > time:
+                            return False
+                        # Checks if the task envelopes another task
+                        elif taskStart < time and taskEnd > total:
+                            return False
+                        # Checks if the task is enveloped by another task
+                        elif taskStart > time and taskEnd < total:
+                            return False
+                        # Checks if current task matches Anti with Recurring
+                        elif issubclass(type(task), Anti) and taskStart == time and taskEnd == total and detail['Task Type'] != "Recurring Task":
+                            return False
+
+        except:
+                pass
+
+        # Validates if all checks fail
+        return True
+
     # Checks if any recurring tasks have an antitask (for deleting recurring task)
-    def checkAnti(self, task):
+    def checkAnti(self, antitask):
         listSche = Schedule.getData()
 
-        date = task.date
+        date = antitask['Date']
 
         for task in listSche:
-            if task['StartTime'] == task.startTime and task.duration == task['Duration']:
+            if task['StartTime'] == antitask['StartTime'] and antitask['Duration'] == task['Duration']:
                 return task['Name']
 
         return ""
@@ -203,47 +251,16 @@ class UpdatedChecking:
         listSche = Schedule.getData()
         
         date = task.date
+        
+        # Checks if the checked task is an antitask in order to continue
+        if not issubclass(type(task), Anti):
+            return False
 
+        # Iterates through the data to search for the matching recurring task
         for task in listSche:
-            
-
-        for tasks in listSche[date]:
-            detail = listSche[date][tasks]
-            if detail['Task Type'] == "Recurring Task" and task.startTime == detail['Time'] and task.duration == detail['Duration']:
-                # Returns True if there is a match
+            if task['StartDate'] == date[i] and task.startTime == task['StartTime'] and task.duration == task['Duration'] and isRecurring(task):
                 return True
         return False
-
-    # Gets the missing task id          
-    def getTaskIndex(self, date):
-        listSche = Schedule.getData()
-
-        count = []
-        date = str(date)
-
-        # Will retrieve the next avaliable index of a task
-        for days in listSche:
-            taskindex = listSche[days].keys()
-            for index in taskindex:
-                if days == date:
-                    count.append(int(index.split()[1]))
-        count.sort()
-
-        if len(count) == 0:
-            taskno = 1
-        elif min(count) > 1:
-            taskno = min(count)-1
-        elif(len(count) != max(count)):
-            for i in range(max(count)):
-                if i+1 != count[i]:
-                    taskno = i+1
-                    break
-        else:
-            taskno = max(count)+1
-        
-        newtask = "Task %d" % taskno
-
-        return newtask
 
     # Validates Tasks attributes are appropriate    
     def checkAll(self, task):
@@ -257,28 +274,44 @@ class UpdatedChecking:
         else:
             return False
 
+    # For viewing task
     def hideAnti(self, date):
         listSche = Schedule.getData()
-        tempSche = Schedule.getData()
-        try:
-            x = listSche[date]
-        except:
-            return None
 
-        for tasks in listSche[date]:
-            y = listSche[date][tasks]
-            if y['Task Type'] == "Anti Task":
-                checkingTask = Anti(y['Name'], y['Time'], y['Duration'], date, y['Task Type'])
-                if self.noOverlapAnti(checkingTask):
-                    time = y['Time']
-                    dur = y['Duration']
-                    for pairtask in listSche[date]:
-                        x = listSche[date][pairtask]
-                        if x['Task Type'] == "Recurring Task" and x['Time'] == time and x['Duration'] == dur:
-                            del tempSche[date][pairtask]
-                    del tempSche[date][tasks]
+        for task in listSche:
+            if task['StartDate'] == date:
+                if task['Type'] == "Cancellation":
+                    anti = task
+            for matchtask in listSche:
+                if matchtask['StartTime'] == anti['StartTime'] and matchtask['Duration'] == anti['Duration'] and isRecurring(matchtask):
+                    # Get recurring dates
+                    datesRE = self.iterateDate(matchtask['StartDate'], matchtask['EndDate'], matchtask['Frequency'])
+                    for days in datesRE:
+                        # Removes anti and recurring from displayed schedule if an instance of the recurring day matches with antitask date
+                        if days == date:
+                            listSche.remove(task)
+                            listSche.remove(matchtask)
+                            break
+                    break
 
-        return tempSche
+        return listSche
         
-x =UpdatedChecking()
-x.checkName("A")
+
+    def isRecurring(task):
+        if task['Type'] in ["Study", "Class", "Sleep", "Exercise", "Work", "Meal"]:
+            return True
+        else:
+            return False
+
+    def isAnti(task):
+        if task['Type'] == "Cancellation":
+            return True
+        else:
+            return False
+
+    def isTran(task):
+        if task['Type'] in ["Visit", "Shopping", "Appointment"]:
+            return True
+        else:
+            return False
+    
