@@ -76,44 +76,14 @@ class PSS:
             if task['Name'] == name:
                 if UpdatedChecking.isRecurring(task):
                     antiName = mod.checkAnti(task)
-
-                #mycol.delete_one({'Name':name})
-
-        match taskType:
-            case "Recurring Task":
-                try:
-                    checkingTask = Recurring(name, start, dur, date, taskType, end, freq)
-                    antiName = mod.checkAnti(checkingTask)
                     if antiName != "":
                         self.deleteTask(antiName)
-                    del tempSche[date][x]
-                    # Deletes the day from schedule if no tasks are stored
-                    if tempSche[date] == {}:
-                        del tempSche[date]
-                    # Replaces the day with the new day schedule
-                    mycol.replace_one(query, tempSche)
-                    # Continue to delete all instances of the task with its name
-                    self.deleteTask(name)
-                except:
-                    print("Deleted all occurances of {}".format(name))
-                    pass
-            case "Anti Task":
-                checkingTask = Anti(name, start, dur, date, taskType)
-                # Checks if deleting antitask will not cause conflict
-                if mod.noOverlapAnti(checkingTask):
-                    del tempSche[date][x]
-                    if tempSche[date] == {}:
-                        del tempSche[date]
-                    # Replaces the day with the new day schedule
-                    mycol.replace_one(query, tempSche)
-                else:
-                    print("Conflicting tasks upon deletion. Operation terminated...")
-            # Just deletes the task, no checking required
-            case "Transient Task":
-                del tempSche[date][x]
-                if tempSche[date] == {}:
-                    del tempSche[date]
-                mycol.replace_one(query, tempSche)
+                    query = {'Name':name}
+                elif UpdatedChecking.isTran(task):
+                    query = {'Name':name}
+                elif UpdatedChecking.isAnti(task) and mod.noOverlapAnti(task):
+                    query = {'Name':name}
+                mycol.delete_one(query)
 
     def editTask(self, oldtask, newtask):
         mod = Checking()
@@ -176,42 +146,40 @@ class PSS:
 
     def viewDaySchedule(self, date):
         mod = Checking()
-
+        mod2 = UpdatedChecking()
         listSche = mod.hideAnti(date)
-        tempSche = mod.hideAnti(date)
         
-        sortedTasks = []
+        daySche = []
         sortedSchedule = []
-        try:
-            while listSche[date] != {}:
-                minTime = 24
-                for tasks in listSche[date]:
-                    start = mod.convertTime(listSche[date][tasks]['Time'])
-                    # Gets the earliest start time
-                    if start < minTime:
-                        minTime = start
-                        selectTask = tasks
-                # Deletes the earliest task for iteration
-                del listSche[date][selectTask]
-                # Appends if task's time is the earliest
-                for tasks in tempSche[date]:
-                        if mod.convertTime(tempSche[date][tasks]['Time']) == minTime:
-                            sortedTasks.append(tasks)
-                            break
+        
+        mod2.iterateDate()
+
+        for task in listSche:
+            if UpdatedChecking.isRecurring(task):
+                if task['StartDate'] == date:
+                    daySche.append({"Name":task['Name'], "Type":task['Type'], "StartDate":task['StartDate'], "StartTime":task['StartTime'], "Duration":task['Duration']})
+            elif task['Date'] == date:
+                daySche.append({"Name":task['Name'], "Type":task['Type'], "Date":task['Date'], "StartTime":task['StartTime'], "Duration":task['Duration']})
+
+        tasknum = len(daySche)
+        
+        while True:
+            minTime = 24
+            # Get the earliest time
+            for i in range(len(daySche)):
+                if daySche[i]['StartTime'] < minTime:
+                    minTime = daySche[i]['StartTime']
+            # Append to sorted schedule for earliest time
+            for i in range(len(daySche)):
+                if daySche[i]['StartTime']==minTime:
+                    sortedSchedule.append(daySche[i])
+                    daySche.remove(daySche[i])
+                    break
+            # Breaks when all tasks are sorted in the schedule
+            if daySche == []:
+                break
             
-            # Returns the task objects in a sorted array
-            i = 0
-            for tasks in sortedTasks:
-                if tasks == sortedTasks[i]:
-                    sortedSchedule.append(tempSche[date][tasks])
-                i += 1
-        except:
-            # Day does not exists and will not add to added
-            pass
-        if sortedSchedule != []:
-            return {date : sortedSchedule}
-        else:
-            return None
+            return sortedSchedule
 
     def viewWeekSchedule(self, date):
         mod = Checking()
@@ -220,9 +188,9 @@ class PSS:
         # Appends a day's schedule to the week schedule
         # Will not load days without tasks
         for i in range(7):
-            nextday =str(mod.formatDate(str(int(date)+i)))
+            nextday =mod.formatDate(str(date+i))
             sortedDay = self.viewDaySchedule(nextday)
-            if sortedDay != None:
+            if sortedDay != []:
                 sortedWeek.append(sortedDay)
 
         return sortedWeek
@@ -242,9 +210,9 @@ class PSS:
         # Appends a day's schedule to the week schedule
         # Will not load days without tasks
         for i in range(endOfMonth):
-            nextday =str(mod.formatDate(str(int(newDate)+i)))
+            nextday =mod.formatDate(str(newDate)+i)
             sortedDay = self.viewDaySchedule(nextday)
-            if sortedDay != None:
+            if sortedDay != []:
                 sortedMonth.append(sortedDay)
         
         return sortedMonth
