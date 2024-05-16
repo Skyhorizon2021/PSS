@@ -17,7 +17,7 @@ class MenuBar():
 
         #Display Menu
         display = tk.Menu(menubar, tearoff=0)
-        display.add_command(label="Show Day", command=lambda: self.show(0)) #lambda makes the command not call right away on start up so we can pass parameters to these functions
+        display.add_command(label="Show Day", command=lambda: self.show(0))
         display.add_command(label="Show Week", command=lambda: self.show(1))
         display.add_command(label="Show Month", command=lambda: self.show(2))
         menubar.add_cascade(label="Display", menu=display)
@@ -30,11 +30,10 @@ class MenuBar():
 
         #Edit Menu
         edit = tk.Menu(menubar, tearoff=0)
-        edit.add_command(label="Create Recurring Task", command=lambda: self.create_recurring_task())
-        edit.add_command(label="Create Transient Task", command=lambda: self.create_transient_task())
-        edit.add_command(label="Create Anti-Task", command=lambda: self.create_anti_task())
-        edit.add_command(label="Edit Task", command=lambda: self.edit_task())
-        edit.add_command(label="Find Task", command=self.donothing)
+        edit.add_command(label="Create Recurring Task", command=self.create_recurring_task)
+        edit.add_command(label="Create Transient Task", command=self.create_transient_task)
+        edit.add_command(label="Create Anti-Task", command=self.create_anti_task)
+        edit.add_command(label="Edit Task", command=self.donothing)
         edit.add_separator()
         edit.add_command(label="Delete Task", command=self.donothing)
         menubar.add_cascade(label="Edit", menu=edit)
@@ -49,22 +48,19 @@ class MenuBar():
         self.new_window = DisplayWindow(self.window, type)
 
     def create_recurring_task(self):
-        self.new_window = RecurringTaskWindow()
+        newWindow = RecurringTaskWindow()
 
     def create_transient_task(self):
-        self.new_window = TransientTaskWindow()
+        newWindow = TransientTaskWindow()
 
     def create_anti_task(self):
-        self.new_window = AntiTaskWindow()
-
-    def edit_task(self):
-        self.new_window = EditWindow()
+        newWindow = AntiTaskWindow()
 
 class FileWindow(Toplevel):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("File Upload")
-        self.geometry("400x300")
+        self.geometry("400x200")
 
         #button to upload a file
         self.label = tk.Label(self, text="Add Tasks Through JSON File")
@@ -81,7 +77,7 @@ class DisplayWindow(Toplevel):
     def __init__(self, parent, type, master=None):
         super().__init__(master=master)
         self.title("Schedule Display")
-        self.geometry("400x300")
+        self.geometry("400x200")
         self.date = ""
         self.parent = parent
         self.type = type
@@ -129,7 +125,7 @@ class CreateWindow(tk.Toplevel):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Task")
-        self.geometry("400x300")  # Increased height to accommodate new fields
+        self.geometry("400x250")  # Increased height to accommodate new fields
 
         frame = Frame(self)
         frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
@@ -199,6 +195,7 @@ class TransientTaskWindow(CreateWindow):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Transient Task")
+        self.geometry("400x300")
 
     def submit_task(self):
         super().submit_task()
@@ -209,6 +206,7 @@ class AntiTaskWindow(CreateWindow):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Anti Task")
+        self.geometry("400x300")
 
     def submit_task(self):
         super().submit_task()
@@ -219,8 +217,9 @@ class RecurringTaskWindow(CreateWindow):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Recurring Task")
+        self.geometry("400x300")
 
-        #Remove CreateWindow date labels and entry fields
+          # Remove CreateWindow date labels and entry fields
         self.label_day.grid_remove()
         self.label_month.grid_remove()
         self.label_year.grid_remove()
@@ -271,48 +270,6 @@ class RecurringTaskWindow(CreateWindow):
         frequency = int(self.entry_frequency.get())
         task = Recurring(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get(), start_day, start_month, start_year, end_day, end_month, end_year, frequency)
         messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Date: {start_day}/{start_month}/{start_year}\nEnd Date: {end_day}/{end_month}/{end_year}\nFrequency: {frequency}")
-
-class EditWindow(Toplevel):
-    def __init__(self, master=None):
-        super().__init__(master=master)
-        self.title("Edit Task")
-        self.geometry("400x300")
-
-        #button to upload a file
-        self.label = Label(self, text="Enter name of task: ")
-        self.button = Button(self, text='Search', command=self.search)
-        self.entry = tk.Entry(self)
-
-        self.label.place(relx=.5, rely=.3, anchor = CENTER)
-        self.entry.place(relx=.5, rely=.4, anchor = CENTER)
-        self.button.place(relx=.5, rely=.5, anchor = CENTER)
-
-    def search(self):
-        #PSS.searchTask()
-        output = ""
-        print(self.entry.get())
-        self.label = Label(self, text=output)
-        self.next = Label(self, text="What type of task would you like to create?")
-        self.recur_button = Button(self, text="Recurring Task", command=self.create_recurring_task)
-        self.tran_button = Button(self, text="Transient Task", command=self.create_transient_task)
-        self.anti_button = Button(self, text="Anti Task", command=self.create_anti_task)
-
-        self.label.place(relx=.5, rely=.3, anchor = CENTER)
-        self.next.place(relx=.5, rely=.4, anchor = CENTER)
-        self.recur_button.place(relx=.5, rely=.5, anchor = CENTER)
-        self.tran_button.place(relx=.5, rely=.6, anchor = CENTER)
-        self.anti_button.place(relx=.5, rely=.7, anchor = CENTER)
-    
-    def create_recurring_task(self):
-        self.new_window = RecurringTaskWindow()
-        #call delete function for the searched task
-
-    def create_transient_task(self):
-        self.new_window = TransientTaskWindow()
-
-    def create_anti_task(self):
-        self.new_window = AntiTaskWindow()
-        self.destroy()
 
 class MainWindow(tk.Tk):
     def __init__(self):
