@@ -25,7 +25,7 @@ class MenuBar():
         #File Menu
         file = tk.Menu(menubar, tearoff=0)
         file.add_command(label="Open JSON File", command=lambda: self.upload_file())
-        file.add_command(label="Save to JSON File", command=self.donothing)
+        file.add_command(label="Save to JSON File", command=lambda: self.save_file())
         menubar.add_cascade(label="File", menu=file)
 
         #Edit Menu
@@ -34,9 +34,9 @@ class MenuBar():
         edit.add_command(label="Create Transient Task", command=lambda: self.create_transient_task())
         edit.add_command(label="Create Anti-Task", command=lambda: self.create_anti_task())
         edit.add_command(label="Edit Task", command=lambda: self.edit_task())
-        edit.add_command(label="Find Task", command=self.find_task)
+        edit.add_command(label="Find Task", command=lambda: self.find_task)
         edit.add_separator()
-        edit.add_command(label="Delete Task", command=self.del_task)
+        edit.add_command(label="Delete Task", command=lambda: self.del_task)
         menubar.add_cascade(label="Edit", menu=edit)
 
     def donothing(self):
@@ -44,6 +44,9 @@ class MenuBar():
 
     def upload_file(self):
         self.new_window = FileWindow()
+
+    def save_file(self):
+        self.new_window = SaveWindow()
     
     def show(self, type):
         self.new_window = DisplayWindow(self.window, type)
@@ -80,6 +83,25 @@ class FileWindow(Toplevel):
 
     def upload(self):
         #use PSS to call readFromFile function
+
+        filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
+        self.file_name = tk.Label(self, text="File name: " + filename)
+        print('Selected: ', filename)
+
+class SaveWindow(Toplevel):
+    def __init__(self, master=None):
+        super().__init__(master=master)
+        self.title("Save to File")
+        self.geometry("400x300")
+
+        #button to upload a file
+        self.label = tk.Label(self, text="Find Existing JSON File")
+        self.button = tk.Button(self, text='Upload your file', command=self.upload)
+        self.label.place(relx=.5, rely=.38, anchor = CENTER)
+        self.button.place(relx=.5, rely=.5, anchor = CENTER)
+
+    def upload(self):
+        #use PSS to call writeToFile function
 
         filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
         self.file_name = tk.Label(self, text="File name: " + filename)
