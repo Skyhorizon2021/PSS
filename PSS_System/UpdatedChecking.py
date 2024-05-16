@@ -17,9 +17,7 @@ class UpdatedChecking:
             return False
     
     # Validates a unique name
-    def checkName(self, name):
-        names = []
-        
+    def checkName(self, name):       
         # Retrieves and validate schedule
         listsche = Schedule.getData()
 
@@ -203,47 +201,16 @@ class UpdatedChecking:
         listSche = Schedule.getData()
         
         date = task.date
+        
+        # Checks if the checked task is an antitask in order to continue
+        if not issubclass(type(task), Anti):
+            return False
 
+        # Iterates through the data to search for the matching recurring task
         for task in listSche:
-            
-
-        for tasks in listSche[date]:
-            detail = listSche[date][tasks]
-            if detail['Task Type'] == "Recurring Task" and task.startTime == detail['Time'] and task.duration == detail['Duration']:
-                # Returns True if there is a match
+            if task['StartDate'] == date[i] and task.startTime == task['StartTime'] and task.duration == task['Duration'] and isRecurring(task):
                 return True
         return False
-
-    # Gets the missing task id          
-    def getTaskIndex(self, date):
-        listSche = Schedule.getData()
-
-        count = []
-        date = str(date)
-
-        # Will retrieve the next avaliable index of a task
-        for days in listSche:
-            taskindex = listSche[days].keys()
-            for index in taskindex:
-                if days == date:
-                    count.append(int(index.split()[1]))
-        count.sort()
-
-        if len(count) == 0:
-            taskno = 1
-        elif min(count) > 1:
-            taskno = min(count)-1
-        elif(len(count) != max(count)):
-            for i in range(max(count)):
-                if i+1 != count[i]:
-                    taskno = i+1
-                    break
-        else:
-            taskno = max(count)+1
-        
-        newtask = "Task %d" % taskno
-
-        return newtask
 
     # Validates Tasks attributes are appropriate    
     def checkAll(self, task):
@@ -257,28 +224,31 @@ class UpdatedChecking:
         else:
             return False
 
+    # For viewing task
     def hideAnti(self, date):
         listSche = Schedule.getData()
-        tempSche = Schedule.getData()
-        try:
-            x = listSche[date]
-        except:
-            return None
 
-        for tasks in listSche[date]:
-            y = listSche[date][tasks]
-            if y['Task Type'] == "Anti Task":
-                checkingTask = Anti(y['Name'], y['Time'], y['Duration'], date, y['Task Type'])
-                if self.noOverlapAnti(checkingTask):
-                    time = y['Time']
-                    dur = y['Duration']
-                    for pairtask in listSche[date]:
-                        x = listSche[date][pairtask]
-                        if x['Task Type'] == "Recurring Task" and x['Time'] == time and x['Duration'] == dur:
-                            del tempSche[date][pairtask]
-                    del tempSche[date][tasks]
+        for task in listSche:
+            if task['StartDate'] == date:
+                if task['Type'] == "Cancellation":
+                    anti = task
+            for matchtask in listSche:
+                if matchtask['StartTime'] == anti['StartTime'] and matchtask['Duration'] == anti['Duration'] and isRecurring(matchtask):
+                    # Get recurring dates
+                    datesRE = self.iterateDate(matchtask['StartDate'], matchtask['EndDate'], matchtask['Frequency'])
+                    for days in datesRE:
+                        # Removes anti and recurring from displayed schedule if an instance of the recurring day matches with antitask date
+                        if days == date:
+                            listSche.remove(task)
+                            listSche.remove(matchtask)
+                            break
+                    break
 
-        return tempSche
+        return listSche
         
-x =UpdatedChecking()
+
+    def isRecurring(self, task):
+        if task['Type'] in ["Study", "Class", "Sleep", "Exercise", "Work", "Meal"]:
+            return True
+x = UpdatedChecking()
 x.checkName("A")

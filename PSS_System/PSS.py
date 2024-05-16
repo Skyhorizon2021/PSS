@@ -16,6 +16,7 @@ class PSS:
         mycol = mydb["tasks"]
 
         mod = Checking()
+
         if not mod.checkAll(task):
             print("Invalid Attributes")
             return False
@@ -23,69 +24,38 @@ class PSS:
         newSche = Schedule.getData()
 
         taskType = task.type
-        date = str(task.date)
 
-        # Task creation
-        match taskType:
-            case "Recurring Task":
-                # Get dates for recurring objects to be placed in
-                dates = mod.iterateDate(task.date, task.endDate, task.frequency)
-                if mod.noOverlapAdd(task):
-                    for days in dates:
-                        newIndex = mod.getTaskIndex(days)
-                        newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration,
+        # Task Creation
+        if mod.noOverlapAdd(task):
+            if UpdatedChecking.isRecurring(task):
+                newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration,
                                 "EndDate":task.endDate, "Frequency":task.frequency}
-                        try: # Adds Recurring to Existing day
-                            newSche[str(days)][newIndex] = newdict
-                        except: # Creates a new day to add a recurring task
-                            newSche[str(days)] = {newIndex : {}}
-                            newSche[str(days)][newIndex] = newdict
-                        task.date = days
-                    mycol.replace_one({}, newSche)   
-                else:
-                    print("A task exists during this period")
+            elif UpdatedChecking.isTran(task):
+                newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
+            elif UpdatedChecking.isAnti(task) and mod.checkRecurring(task):
+                newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
+            mycol.insert_one(newdict)
+        else:
+            print("Task overlaps another task/recurring DNE")
 
-            case "Transient Task":
-                if mod.noOverlapAdd(task):
-                    newIndex = mod.getTaskIndex(task.date)
-                    newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
-                    try:
-                        newSche[date][newIndex] = newdict
-                    except:
-                        newSche[date] = {newIndex : {}}
-                        newSche[date][newIndex] = newdict
-                    mycol.replace_one({}, newSche)
-                else:
-                    print("Task exists during this period")
-
-            case "Anti Task":
-                if mod.checkRecurring(task):
-                    newIndex = mod.getTaskIndex(task.date)
-                    newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
-                    newSche[date][newIndex] = newdict
-                    mycol.replace_one({}, newSche)
-                else:
-                    print("Recurring Task does not exist")
         return True
 
     def viewTask(name):
      
         listSche = Schedule.getData()
         
-        for days in listSche:
-            task = listSche[days]
-            for detail in task:
-                if name == task[detail]['Name']:
-                    taskname = task[detail]['Name']
-                    taskType = task[detail]['Task Type']
-                    taskDate = days
-                    taskTime = task[detail]['Time']
-                    taskDur = task[detail]['Duration']
-                    if task[detail]["Task Type"] == "Recurring":
-                        end = task[detail]['EndDate']
-                        freq = task[detail]['Frequency']
-                        return Recurring(taskname, taskTime, taskDur, taskDate, taskType, end, freq)
-                    return Transient(taskname, taskTime, taskDur, taskDate, taskType)
+        for task in listSche:
+            if task['Name'] == name:
+                taskname = name
+                taskType = task['Type']
+                taskDate = task['StartDate']
+                taskTime = task['StartTime']
+                taskDur = task['Duration']
+                if UpdatedChecking.isRecurring(task):
+                    end = task['EndDate']
+                    freq = task['Frequency']
+                    return Recurring(taskname, taskTime, taskDur, taskDate, taskType, end, freq)
+                return Transient(taskname, taskTime, taskDur, taskDate, taskType)
 
     def deleteTask(self, name):
         
