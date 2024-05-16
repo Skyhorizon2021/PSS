@@ -34,9 +34,9 @@ class MenuBar():
         edit.add_command(label="Create Transient Task", command=lambda: self.create_transient_task())
         edit.add_command(label="Create Anti-Task", command=lambda: self.create_anti_task())
         edit.add_command(label="Edit Task", command=lambda: self.edit_task())
-        edit.add_command(label="Find Task", command=self.donothing)
+        edit.add_command(label="Find Task", command=self.find_task)
         edit.add_separator()
-        edit.add_command(label="Delete Task", command=self.donothing)
+        edit.add_command(label="Delete Task", command=self.del_task)
         menubar.add_cascade(label="Edit", menu=edit)
 
     def donothing(self):
@@ -59,6 +59,12 @@ class MenuBar():
 
     def edit_task(self):
         self.new_window = EditWindow()
+    
+    def find_task(self):
+        self.new_window = FindWindow()
+
+    def del_task(self):
+        self.new_window = ""
 
 class FileWindow(Toplevel):
     def __init__(self, master=None):
@@ -278,7 +284,6 @@ class EditWindow(Toplevel):
         self.title("Edit Task")
         self.geometry("400x300")
 
-        #button to upload a file
         self.label = Label(self, text="Enter name of task: ")
         self.button = Button(self, text='Search', command=self.search)
         self.entry = tk.Entry(self)
@@ -288,10 +293,15 @@ class EditWindow(Toplevel):
         self.button.place(relx=.5, rely=.5, anchor = CENTER)
 
     def search(self):
-        #PSS.searchTask()
+        #task = PSS.viewTask(self.entry.get())
+        #turn task into a string, assign to output, else give error
         output = ""
         print(self.entry.get())
+
         self.label = Label(self, text=output)
+        self.entry.destroy()
+        self.label.destroy()
+
         self.next = Label(self, text="What type of task would you like to create?")
         self.recur_button = Button(self, text="Recurring Task", command=self.create_recurring_task)
         self.tran_button = Button(self, text="Transient Task", command=self.create_transient_task)
@@ -312,7 +322,31 @@ class EditWindow(Toplevel):
 
     def create_anti_task(self):
         self.new_window = AntiTaskWindow()
-        self.destroy()
+
+class FindWindow(tk.Toplevel):
+    def __init__(self, master=None):
+        super().__init__(master=master)
+        self.title("Find Task")
+        self.geometry("400x300")
+
+        self.label = Label(self, text="Enter name of task: ")
+        self.button = Button(self, text='Search', command=self.search)
+        self.entry = tk.Entry(self)
+
+        self.label.place(relx=.5, rely=.3, anchor = CENTER)
+        self.entry.place(relx=.5, rely=.4, anchor = CENTER)
+        self.button.place(relx=.5, rely=.5, anchor = CENTER)
+
+    def search(self):
+        #task = PSS.viewTask(self.entry.get())
+        #turn task into a string, assign to output, else give error
+        output = ""
+        self.show = Label(self, text=output)
+        self.label.destroy()
+        self.entry.destroy()
+        self.button.destroy()
+        self.show.place(relx=.5, rely=.3, anchor = CENTER)
+
 
 class MainWindow(tk.Tk):
     def __init__(self):
