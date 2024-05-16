@@ -171,7 +171,7 @@ class CreateWindow(tk.Toplevel):
         self.label_task_name = tk.Label(frame, text="Task Name:")
         self.label_start_time = tk.Label(frame, text="Start Time (HH:MM):")
         self.label_duration = tk.Label(frame, text="Duration (minutes):")
-        self.label_date = tk.Label(frame, text="Date (DDMMYYYY):")
+        self.label_date = tk.Label(frame, text="Date (YYYYMMDD):")
 
         # Entries
         self.entry_task_name = tk.Entry(frame)
@@ -238,7 +238,7 @@ class RecurringTaskWindow(CreateWindow):
         self.title("Create Recurring Task")
 
         # Add additional fields specific to Recurring Tasks
-        self.label_end_date = tk.Label(self, text="End Date (DDMMYYYY):")
+        self.label_end_date = tk.Label(self, text="End Date (YYYYMMDD):")
         self.label_frequency = tk.Label(self, text="Frequency:")
 
         self.entry_end_date = tk.Entry(self)
