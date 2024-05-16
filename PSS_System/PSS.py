@@ -63,38 +63,21 @@ class PSS:
         listSche = Schedule.getData()
         tempSche = Schedule.getData()
 
-        # Search for task name
-        for days in listSche:
-            task = listSche[days]
-            for detail in task:
-                # Matching task name
-                if name == task[detail]['Name']:
-                    key_list = list(listSche[days].keys())
-                    value_list = list(listSche[days].values())
-                    date = days
-                    taskDet = task
-                    # Matching task type 
-                    taskType = task[detail]["Task Type"]
-                    start = task[detail]["Time"]
-                    dur = task[detail]["Duration"]
-                    if taskType == "Recurring Task":
-                        end = task[detail]["EndDate"]
-                        freq = task[detail]["Frequency"]
+        mod = Checking()
 
-                    matchTask = task[detail]
-                
-                    value = value_list.index(matchTask)
-        # Gets the key value for the task
-        x = key_list[value]
-        
         # Searching inside database
         myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 
         mydb = myclient["schedule"]
         mycol = mydb["tasks"]
 
-        query = {date : taskDet}
-        mod = Checking()
+        # Search for task name
+        for task in listSche:
+            if task['Name'] == name:
+                if UpdatedChecking.isRecurring(task):
+                    antiName = mod.checkAnti(task)
+
+                #mycol.delete_one({'Name':name})
 
         match taskType:
             case "Recurring Task":
