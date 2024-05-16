@@ -34,7 +34,7 @@ class MenuBar():
         edit.add_command(label="Create Transient Task", command=lambda: self.create_transient_task())
         edit.add_command(label="Create Anti-Task", command=lambda: self.create_anti_task())
         edit.add_command(label="Edit Task", command=lambda: self.edit_task())
-        edit.add_command(label="Find Task", command=lambda: self.find_task)
+        edit.add_command(label="Find Task", command=lambda: self.find_task())
         edit.add_separator()
         edit.add_command(label="Delete Task", command=lambda: self.del_task())
         menubar.add_cascade(label="Edit", menu=edit)
@@ -186,16 +186,14 @@ class CreateWindow(tk.Toplevel):
         self.label_task_name.grid(row=0, column=0, sticky="e", pady=5)
         self.label_start_time.grid(row=1, column=0, sticky="e", pady=5)
         self.label_duration.grid(row=2, column=0, sticky="e", pady=5)
-
-        # New labels layout
-        self.label_date.grid(row=4, column=0, sticky="e", pady=5)
+        self.label_date.grid(row=3, column=0, sticky="e", pady=5)
 
         self.entry_task_name.grid(row=0, column=1)
         self.entry_start_time.grid(row=1, column=1)
         self.entry_duration.grid(row=2, column=1)
-        self.entry_date.grid(row=4, column=1)
+        self.entry_date.grid(row=3, column=1)
 
-        self.button_submit.grid(row=6, columnspan=2, pady=8)
+        self.button_submit.grid(row=8, columnspan=2, pady=8)
 
     def submit_task(self):
         # Retrieve task details from entries
@@ -210,6 +208,29 @@ class CreateWindow(tk.Toplevel):
         # Message box confirming task submission
         messagebox.showinfo("Task Submitted", f"Task '{task_name}' submitted successfully!")
 
+    def recurring(self):
+        self.label_end_date = tk.Label(self, text="End Date (YYYYMMDD):")
+        self.label_frequency = tk.Label(self, text="Frequency (1 daily or 7 weekly):")
+
+        self.entry_end_date = tk.Entry(self)
+        self.entry_frequency = tk.Entry(self)
+
+        self.label_task_name.grid(row=0, column=0, sticky="e", pady=5)
+        self.label_start_time.grid(row=1, column=0, sticky="e", pady=5)
+        self.label_duration.grid(row=2, column=0, sticky="e", pady=5)
+        self.label_date.grid(row=3, column=0, sticky="e", pady=5)
+
+        self.entry_task_name.grid(row=0, column=1)
+        self.entry_start_time.grid(row=1, column=1)
+        self.entry_duration.grid(row=2, column=1)
+        self.entry_date.grid(row=3, column=1)
+
+        self.label_end_date.grid(row=4, column=0, sticky="e", pady=5)
+        self.entry_end_date.grid(row=4, column=1)
+        self.label_frequency.grid(row=5, column=0, sticky="e", pady=5)
+        self.entry_frequency.grid(row=5, column=1)
+        self.button_submit.grid(row=6, columnspan=2, pady=8)
+
 class TransientTaskWindow(CreateWindow):
     def __init__(self, master=None):
         super().__init__(master=master)
@@ -218,8 +239,8 @@ class TransientTaskWindow(CreateWindow):
     def submit_task(self):
         self.task_type= "Transient Task"
         super().submit_task()
-        task = Transient(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
-        messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
+        task = Transient(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.task_type)
+        messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class AntiTaskWindow(CreateWindow):
     def __init__(self, master=None):
@@ -229,8 +250,8 @@ class AntiTaskWindow(CreateWindow):
     def submit_task(self):
         self.task_type = "Anti Task"
         super().submit_task()
-        task = Anti(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
-        messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
+        task = Anti(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.task_type)
+        messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class RecurringTaskWindow(CreateWindow):
     def __init__(self, master=None):
@@ -238,23 +259,13 @@ class RecurringTaskWindow(CreateWindow):
         self.title("Create Recurring Task")
 
         # Add additional fields specific to Recurring Tasks
-        self.label_end_date = tk.Label(self, text="End Date (YYYYMMDD):")
-        self.label_frequency = tk.Label(self, text="Frequency:")
-
-        self.entry_end_date = tk.Entry(self)
-        self.entry_frequency = tk.Entry(self)
-
-        self.label_end_date.grid(row=5, column=0, sticky="e", pady=5)
-        self.entry_end_date.grid(row=5, column=1)
-        self.label_frequency.grid(row=6, column=0, sticky="e", pady=5)
-        self.entry_frequency.grid(row=6, column=1)
-        self.button_submit.grid(row=7, columnspan=2, pady=8)
+        super().recurring()
 
     def submit_task(self):
         self.task_type = "Recurring Task"
         super().submit_task()
-        task = Recurring(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get(), self.entry_end_date.get(), self.entry_frequency.get())
-        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
+        task = Recurring(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.task_type, self.entry_end_date.get(), self.entry_frequency.get())
+        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
 
 class EditWindow(Toplevel):
     def __init__(self, master=None):
