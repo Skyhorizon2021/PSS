@@ -19,6 +19,7 @@ class Schedule:
         mydb = myclient["schedule"]
         mycol = mydb["tasks"]
 
+<<<<<<< HEAD
         schedule = []
 
         x = mycol.find()
@@ -27,3 +28,10 @@ class Schedule:
             schedule.append(doc)
         return schedule
 Schedule.getData()
+=======
+        x = mycol.find_one()
+        del x['_id']
+        return x
+
+#Schedule.loadData('Resources//db_example.json')
+>>>>>>> 89c4ba0ae5542ab91c3b7f601fb8204ff06eebbc

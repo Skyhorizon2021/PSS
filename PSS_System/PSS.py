@@ -2,7 +2,7 @@ from Schedule import *
 from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
-from Checking import *
+import Checking
 import pymongo
 from bson.json_util import dumps
 import calendar
@@ -373,3 +373,4 @@ class PSS:
             self.writeDaySchedule(filename, nextday)
 
 PSS.viewTask("A")
+

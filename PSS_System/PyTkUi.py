@@ -36,7 +36,7 @@ class MenuBar():
         edit.add_command(label="Edit Task", command=lambda: self.edit_task())
         edit.add_command(label="Find Task", command=lambda: self.find_task)
         edit.add_separator()
-        edit.add_command(label="Delete Task", command=lambda: self.del_task)
+        edit.add_command(label="Delete Task", command=lambda: self.del_task())
         menubar.add_cascade(label="Edit", menu=edit)
 
     def donothing(self):
@@ -67,7 +67,7 @@ class MenuBar():
         self.new_window = FindWindow()
 
     def del_task(self):
-        self.new_window = ""
+        self.new_window = DeleteWindow()
 
 class FileWindow(Toplevel):
     def __init__(self, master=None):
@@ -169,25 +169,15 @@ class CreateWindow(tk.Toplevel):
 
         # Labels
         self.label_task_name = tk.Label(frame, text="Task Name:")
-        self.label_task_type = tk.Label(frame, text="Task Type:")
         self.label_start_time = tk.Label(frame, text="Start Time (HH:MM):")
         self.label_duration = tk.Label(frame, text="Duration (minutes):")
-
-        # New labels for date fields
-        self.label_day = tk.Label(frame, text="Day (DD):")
-        self.label_month = tk.Label(frame, text="Month (MM):")
-        self.label_year = tk.Label(frame, text="Year (YYYY):")
+        self.label_date = tk.Label(frame, text="Date (YYYYMMDD):")
 
         # Entries
         self.entry_task_name = tk.Entry(frame)
-        self.entry_task_type = tk.Entry(frame)
         self.entry_start_time = tk.Entry(frame)
         self.entry_duration = tk.Entry(frame)
-
-        # New entries for date fields
-        self.entry_day = tk.Entry(frame)
-        self.entry_month = tk.Entry(frame)
-        self.entry_year = tk.Entry(frame)
+        self.entry_date = tk.Entry(frame)
 
         # Buttons
         self.button_submit = tk.Button(frame, text="Submit", command=self.submit_task)
@@ -198,32 +188,24 @@ class CreateWindow(tk.Toplevel):
         self.label_duration.grid(row=2, column=0, sticky="e", pady=5)
 
         # New labels layout
-        self.label_day.grid(row=3, column=0, sticky="e", pady=5)
-        self.label_month.grid(row=4, column=0, sticky="e", pady=5)
-        self.label_year.grid(row=5, column=0, sticky="e", pady=5)
+        self.label_date.grid(row=4, column=0, sticky="e", pady=5)
 
         self.entry_task_name.grid(row=0, column=1)
         self.entry_start_time.grid(row=1, column=1)
         self.entry_duration.grid(row=2, column=1)
-
-        # New entries layout
-        self.entry_day.grid(row=3, column=1)
-        self.entry_month.grid(row=4, column=1)
-        self.entry_year.grid(row=5, column=1)
+        self.entry_date.grid(row=4, column=1)
 
         self.button_submit.grid(row=6, columnspan=2, pady=8)
 
     def submit_task(self):
         # Retrieve task details from entries
         task_name = self.entry_task_name.get()
-        task_type = self.entry_task_type.get()
         start_time = self.entry_start_time.get()
         duration = self.entry_duration.get()
 
         # Retrieve date fields
-        day = int(self.entry_day.get())
-        month = int(self.entry_month.get())
-        year = int(self.entry_year.get())
+        date = self.entry_date.get()
+
 
         # Message box confirming task submission
         messagebox.showinfo("Task Submitted", f"Task '{task_name}' submitted successfully!")
@@ -234,8 +216,9 @@ class TransientTaskWindow(CreateWindow):
         self.title("Create Transient Task")
 
     def submit_task(self):
+        self.task_type= "Transient Task"
         super().submit_task()
-        task = Transient(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get())
+        task = Transient(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
         messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class AntiTaskWindow(CreateWindow):
@@ -244,8 +227,9 @@ class AntiTaskWindow(CreateWindow):
         self.title("Create Anti Task")
 
     def submit_task(self):
+        self.task_type = "Anti Task"
         super().submit_task()
-        task = Anti(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get())
+        task = Anti(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
         messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class RecurringTaskWindow(CreateWindow):
@@ -253,57 +237,24 @@ class RecurringTaskWindow(CreateWindow):
         super().__init__(master=master)
         self.title("Create Recurring Task")
 
-        #Remove CreateWindow date labels and entry fields
-        self.label_day.grid_remove()
-        self.label_month.grid_remove()
-        self.label_year.grid_remove()
-        self.entry_day.grid_remove()
-        self.entry_month.grid_remove()
-        self.entry_year.grid_remove()
+        # Add additional fields specific to Recurring Tasks
+        self.label_end_date = tk.Label(self, text="End Date (YYYYMMDD):")
+        self.label_frequency = tk.Label(self, text="Frequency:")
 
-        self.label_start_day = tk.Label(self, text="Start Day:")
-        self.label_start_month = tk.Label(self, text="Start Month:")
-        self.label_start_year = tk.Label(self, text="Start Year:")
-        self.label_end_day = tk.Label(self, text="End Day:")
-        self.label_end_month = tk.Label(self, text="End Month:")
-        self.label_end_year = tk.Label(self, text="End Year:")
-        self.label_frequency = tk.Label(self, text="Frequency (1: Daily, 7: Weekly):")
-
-        self.entry_start_day = tk.Entry(self)
-        self.entry_start_month = tk.Entry(self)
-        self.entry_start_year = tk.Entry(self)
-        self.entry_end_day = tk.Entry(self)
-        self.entry_end_month = tk.Entry(self)
-        self.entry_end_year = tk.Entry(self)
+        self.entry_end_date = tk.Entry(self)
         self.entry_frequency = tk.Entry(self)
 
-        self.label_start_day.grid(row=3, column=0, sticky="e", pady=5)
-        self.label_start_month.grid(row=4, column=0, sticky="e", pady=5)
-        self.label_start_year.grid(row=5, column=0, sticky="e", pady=5)
-        self.label_end_day.grid(row=6, column=0, sticky="e", pady=5)
-        self.label_end_month.grid(row=7, column=0, sticky="e", pady=5)
-        self.label_end_year.grid(row=8, column=0, sticky="e", pady=5)
-        self.label_frequency.grid(row=9, column=0, sticky="e", pady=5)
-
-        self.entry_start_day.grid(row=3, column=1)
-        self.entry_start_month.grid(row=4, column=1)
-        self.entry_start_year.grid(row=5, column=1)
-        self.entry_end_day.grid(row=6, column=1)
-        self.entry_end_month.grid(row=7, column=1)
-        self.entry_end_year.grid(row=8, column=1)
-        self.entry_frequency.grid(row=9, column=1)
+        self.label_end_date.grid(row=5, column=0, sticky="e", pady=5)
+        self.entry_end_date.grid(row=5, column=1)
+        self.label_frequency.grid(row=6, column=0, sticky="e", pady=5)
+        self.entry_frequency.grid(row=6, column=1)
+        self.button_submit.grid(row=7, columnspan=2, pady=8)
 
     def submit_task(self):
+        self.task_type = "Recurring Task"
         super().submit_task()
-        start_day = int(self.entry_start_day.get())
-        start_month = int(self.entry_start_month.get())
-        start_year = int(self.entry_start_year.get())
-        end_day = int(self.entry_end_day.get())
-        end_month = int(self.entry_end_month.get())
-        end_year = int(self.entry_end_year.get())
-        frequency = int(self.entry_frequency.get())
-        task = Recurring(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get(), start_day, start_month, start_year, end_day, end_month, end_year, frequency)
-        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Date: {start_day}/{start_month}/{start_year}\nEnd Date: {end_day}/{end_month}/{end_year}\nFrequency: {frequency}")
+        task = Recurring(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get(), self.entry_end_date.get(), self.entry_frequency.get())
+        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
 
 class EditWindow(Toplevel):
     def __init__(self, master=None):
@@ -352,6 +303,31 @@ class EditWindow(Toplevel):
 
     def create_anti_task(self, task):
         self.new_window = AntiTaskWindow()
+
+class DeleteWindow(tk.Toplevel):
+    def __init__(self, master=None):
+        super().__init__(master=master)
+        self.title("Delete Task")
+        self.geometry("300x150")
+
+        frame = tk.Frame(self)
+        frame.pack(expand=True, fill=tk.BOTH)
+
+        self.label_task_name = tk.Label(frame, text="Task Name:")
+        self.entry_task_name = tk.Entry(frame)
+
+        self.button_delete = tk.Button(frame, text="Delete", command=self.delete_task)
+
+        self.label_task_name.pack(pady=5)
+        self.entry_task_name.pack(pady=5)
+        self.button_delete.pack(pady=10)
+
+    def delete_task(self):
+        task_name = self.entry_task_name.get()
+        # Call deleteTasks function with the task_name
+        #deleteTasks(task_name)
+        messagebox.showinfo("Task Deleted", f"Task '{task_name}' has been deleted.")
+    
 
 class FindWindow(tk.Toplevel):
     def __init__(self, master=None):
