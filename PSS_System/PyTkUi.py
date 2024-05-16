@@ -196,7 +196,9 @@ class CreateWindow(tk.Toplevel):
         self.entry_duration.grid(row=2, column=1)
         self.entry_date.grid(row=3, column=1)
 
+
         self.button_submit.grid(row=4, columnspan=2, pady=8)
+
 
     def submit_task(self):
         # Retrieve task details from entries
@@ -219,8 +221,8 @@ class TransientTaskWindow(CreateWindow):
     def submit_task(self):
         self.task_type= "Transient Task"
         super().submit_task()
-        task = Transient(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
-        messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
+        task = Transient(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.task_type)
+        messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class AntiTaskWindow(CreateWindow):
     def __init__(self, master=None):
@@ -230,8 +232,8 @@ class AntiTaskWindow(CreateWindow):
     def submit_task(self):
         self.task_type = "Anti Task"
         super().submit_task()
-        task = Anti(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
-        messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
+        task = Anti(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.task_type)
+        messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class RecurringTaskWindow(CreateWindow):
     def __init__(self, master=None):
@@ -254,8 +256,8 @@ class RecurringTaskWindow(CreateWindow):
     def submit_task(self):
         self.task_type = "Recurring Task"
         super().submit_task()
-        task = Recurring(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get(), self.entry_end_date.get(), self.entry_frequency.get())
-        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
+        task = Recurring(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.task_type, self.entry_end_date.get(), self.entry_frequency.get())
+        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
 
 class EditWindow(Toplevel):
     def __init__(self, master=None):
@@ -287,7 +289,6 @@ class EditWindow(Toplevel):
         self.tran_button = Button(self, text="Transient Task", command=lambda: self.create_transient_task(task))
         self.anti_button = Button(self, text="Anti Task", command=lambda: self.create_anti_task(task))
 
-        self.label.place(relx=.5, rely=.3, anchor = CENTER)
         self.next.place(relx=.5, rely=.4, anchor = CENTER)
         self.recur_button.place(relx=.5, rely=.5, anchor = CENTER)
         self.tran_button.place(relx=.5, rely=.6, anchor = CENTER)
