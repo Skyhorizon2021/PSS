@@ -83,8 +83,8 @@ class FileWindow(Toplevel):
 
     def upload(self):
         #use PSS to call readFromFile function
-
         filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
+        PSS.readFromFile(filename)
         self.file_name = tk.Label(self, text="File name: " + filename)
         print('Selected: ', filename)
 
@@ -102,8 +102,8 @@ class SaveWindow(Toplevel):
 
     def upload(self):
         #use PSS to call writeToFile function
-
         filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
+        PSS.writeToFile(filename)
         self.file_name = tk.Label(self, text="File name: " + filename)
         print('Selected: ', filename)
 
@@ -346,9 +346,9 @@ class FindWindow(tk.Toplevel):
         self.button.place(relx=.5, rely=.5, anchor = CENTER)
 
     def search(self):
-        #task = PSS.viewTask(self.entry.get())
+        task = PSS.viewTask(self.entry.get())
         #turn task into a string, assign to output, else give error
-        output = ""
+        output = task
         self.show = Label(self, text=output)
         self.label.destroy()
         self.entry.destroy()

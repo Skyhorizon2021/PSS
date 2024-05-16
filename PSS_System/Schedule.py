@@ -8,7 +8,6 @@ class Schedule:
         mydb = myclient["schedule"]
         mycol = mydb["tasks"]
 
-
         with open(filename) as file:
             file_data = json.load(file)
 
