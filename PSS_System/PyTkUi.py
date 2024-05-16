@@ -3,7 +3,10 @@ from tkinter import messagebox
 from tkinter import *
 from tkinter import filedialog
 
-from PSS import *
+#from PSS import *
+from Models.RecurringModel import Recurring
+from Models.TransientModel import Transient
+from Models.AntiTaskModel import Anti
 
 class MenuBar():
     def __init__(self, window):
@@ -52,7 +55,71 @@ class MenuBar():
 
     def create_anti_task(self):
         newWindow = AntiTaskWindow()
-        
+
+class FileWindow(Toplevel):
+    def __init__(self, master=None):
+        super().__init__(master=master)
+        self.title("File Upload")
+        self.geometry("400x200")
+
+        #button to upload a file
+        self.label = tk.Label(self, text="Add Tasks Through JSON File")
+        self.button = tk.Button(self, text='Upload your file', command=self.upload)
+        self.label.place(relx=.5, rely=.38, anchor = CENTER)
+        self.button.place(relx=.5, rely=.5, anchor = CENTER)
+
+    def upload(self):
+        filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
+        self.file_name = tk.Label(self, text="File name: " + filename)
+        print('Selected: ', filename)
+
+class DisplayWindow(Toplevel):
+    def __init__(self, parent, type, master=None):
+        super().__init__(master=master)
+        self.title("Schedule Display")
+        self.geometry("400x200")
+        self.date = ""
+        self.parent = parent
+        self.type = type
+    
+        self.frame=Frame(self)
+        self.frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+    
+        if type == 0:
+            self.label = Label(self.frame, text="Day to Display (YYYYMMDD):")
+        elif type == 1:
+            self.label = Label(self.frame, text="Starting Date for Week to Display (YYYYMMDD):")
+        elif type == 2:
+            self.label = Label(self.frame, text="Starting Date for Month to Display (YYYYMMDD):")
+        else:
+            self.label = Label(self.frame, text='')
+        self.entry = tk.Entry(self.frame)
+
+        self.label.pack()
+        self.entry.pack()
+
+        self.button = tk.Button(self.frame, text="Submit", command=self.submit)
+        self.button.pack()
+
+    def submit(self):
+        day = self.entry.get()
+        #schedule = PSS.viewDaySchedule(date)
+        new_frame = ScheduleFrame(self.parent, self.type, day)
+        self.parent.place_frame(new_frame)
+        self.destroy()
+
+class ScheduleFrame(tk.Frame):
+    def __init__(self, parent, type, day):        
+        tk.Frame.__init__(self, parent)
+        if type == 0:
+            self.label = Label(self, text="This will show day " + day)
+        elif type == 1:
+            self.label = Label(self, text="This will show week " + day)
+        elif type == 2:
+            self.label = Label(self, text="This will show month " + day)
+        else:
+            self.label = Label(self.frame, text='')
+        self.label.pack()
 
 class CreateWindow(tk.Toplevel):
     def __init__(self, master=None):
@@ -121,74 +188,8 @@ class CreateWindow(tk.Toplevel):
         month = int(self.entry_month.get())
         year = int(self.entry_year.get())
 
-        task = Task(task_name, task_type, start_time, duration, day, month, year)
         # Message box confirming task submission
         messagebox.showinfo("Task Submitted", f"Task '{task_name}' submitted successfully!")
-
-class FileWindow(Toplevel):
-    def __init__(self, master=None):
-        super().__init__(master=master)
-        self.title("File Upload")
-        self.geometry("400x200")
-
-        #button to upload a file
-        self.label = tk.Label(self, text="Add Tasks Through JSON File")
-        self.button = tk.Button(self, text='Upload your file', command=self.upload)
-        self.label.place(relx=.5, rely=.38, anchor = CENTER)
-        self.button.place(relx=.5, rely=.5, anchor = CENTER)
-
-    def upload(self):
-        filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
-        self.file_name = tk.Label(self, text="File name: " + filename)
-        print('Selected: ', filename)
-
-class DisplayWindow(Toplevel):
-    def __init__(self, parent, type, master=None):
-        super().__init__(master=master)
-        self.title("Schedule Display")
-        self.geometry("400x200")
-        self.date = ""
-        self.parent = parent
-        self.type = type
-    
-        self.frame=Frame(self)
-        self.frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-    
-        if type == 0:
-            self.label = Label(self.frame, text="Day to Display (YYYYMMDD):")
-        elif type == 1:
-            self.label = Label(self.frame, text="Starting Date for Week to Display (YYYYMMDD):")
-        elif type == 2:
-            self.label = Label(self.frame, text="Starting Date for Month to Display (YYYYMMDD):")
-        else:
-            self.label = Label(self.frame, text='')
-        self.entry = tk.Entry(self.frame)
-
-        self.label.pack()
-        self.entry.pack()
-
-        self.button = tk.Button(self.frame, text="Submit", command=self.submit)
-        self.button.pack()
-
-    def submit(self):
-        day = self.entry.get()
-        #schedule = PSS.viewDaySchedule(date)
-        new_frame = ScheduleFrame(self.parent, self.type, day)
-        self.parent.place_frame(new_frame)
-        self.destroy()
-
-class ScheduleFrame(tk.Frame):
-    def __init__(self, parent, type, day):        
-        tk.Frame.__init__(self, parent)
-        if type == 0:
-            self.label = Label(self, text="This will show day " + day)
-        elif type == 1:
-            self.label = Label(self, text="This will show week " + day)
-        elif type == 2:
-            self.label = Label(self, text="This will show month " + day)
-        else:
-            self.label = Label(self.frame, text='')
-        self.label.pack()
 
 class TransientTaskWindow(CreateWindow):
     def __init__(self, master=None):
@@ -198,7 +199,7 @@ class TransientTaskWindow(CreateWindow):
 
     def submit_task(self):
         super().submit_task()
-        task = Task(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get())
+        task = Transient(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get())
         messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class AntiTaskWindow(CreateWindow):
@@ -207,10 +208,9 @@ class AntiTaskWindow(CreateWindow):
         self.title("Create Anti Task")
         self.geometry("400x300")
 
-
     def submit_task(self):
         super().submit_task()
-        task = Task(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get())
+        task = Anti(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get())
         messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class RecurringTaskWindow(CreateWindow):
@@ -226,7 +226,6 @@ class RecurringTaskWindow(CreateWindow):
         self.entry_day.grid_remove()
         self.entry_month.grid_remove()
         self.entry_year.grid_remove()
-
 
         self.label_start_day = tk.Label(self, text="Start Day:")
         self.label_start_month = tk.Label(self, text="Start Month:")
@@ -269,7 +268,7 @@ class RecurringTaskWindow(CreateWindow):
         end_month = int(self.entry_end_month.get())
         end_year = int(self.entry_end_year.get())
         frequency = int(self.entry_frequency.get())
-        task = Task(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get(), start_day, start_month, start_year, end_day, end_month, end_year, frequency)
+        task = Recurring(self.entry_task_name.get(), self.entry_task_type.get(), self.entry_start_time.get(), self.entry_duration.get(), start_day, start_month, start_year, end_day, end_month, end_year, frequency)
         messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Date: {start_day}/{start_month}/{start_year}\nEnd Date: {end_day}/{end_month}/{end_year}\nFrequency: {frequency}")
 
 class MainWindow(tk.Tk):
