@@ -116,7 +116,7 @@ class DisplayWindow(Toplevel):
         self.parent = parent
         self.type = type
     
-        self.frame=Frame(self)
+        self.frame=tk.Frame(self)
         self.frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
     
         if type == 0:
@@ -164,23 +164,23 @@ class CreateWindow(tk.Toplevel):
         self.title("Create Task")
         self.geometry("400x300")
 
-        frame = Frame(self)
-        frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.frame = tk.Frame(self)
+        self.frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
         # Labels
-        self.label_task_name = tk.Label(frame, text="Task Name:")
-        self.label_start_time = tk.Label(frame, text="Start Time (HH:MM):")
-        self.label_duration = tk.Label(frame, text="Duration (minutes):")
-        self.label_date = tk.Label(frame, text="Date (YYYYMMDD):")
+        self.label_task_name = tk.Label(self.frame, text="Task Name:")
+        self.label_start_time = tk.Label(self.frame, text="Start Time (HH:MM):")
+        self.label_duration = tk.Label(self.frame, text="Duration (minutes):")
+        self.label_date = tk.Label(self.frame, text="Date (YYYYMMDD):")
 
         # Entries
-        self.entry_task_name = tk.Entry(frame)
-        self.entry_start_time = tk.Entry(frame)
-        self.entry_duration = tk.Entry(frame)
-        self.entry_date = tk.Entry(frame)
+        self.entry_task_name = tk.Entry(self.frame)
+        self.entry_start_time = tk.Entry(self.frame)
+        self.entry_duration = tk.Entry(self.frame)
+        self.entry_date = tk.Entry(self.frame)
 
         # Buttons
-        self.button_submit = tk.Button(frame, text="Submit", command=self.submit_task)
+        self.button_submit = tk.Button(self.frame, text="Submit", command=self.submit_task)
 
         # Layout
         self.label_task_name.grid(row=0, column=0, sticky="e", pady=5)
@@ -193,7 +193,9 @@ class CreateWindow(tk.Toplevel):
         self.entry_duration.grid(row=2, column=1)
         self.entry_date.grid(row=3, column=1)
 
-        self.button_submit.grid(row=8, columnspan=2, pady=8)
+
+        self.button_submit.grid(row=4, columnspan=2, pady=8)
+
 
     def submit_task(self):
         # Retrieve task details from entries
@@ -259,7 +261,17 @@ class RecurringTaskWindow(CreateWindow):
         self.title("Create Recurring Task")
 
         # Add additional fields specific to Recurring Tasks
-        super().recurring()
+        self.label_end_date = tk.Label(self.frame, text="End Date (YYYYMMDD):")
+        self.label_frequency = tk.Label(self.frame, text="Frequency:")
+
+        self.entry_end_date = tk.Entry(self.frame)
+        self.entry_frequency = tk.Entry(self.frame)
+
+        self.label_end_date.grid(row=4, column=0, sticky="e", pady=5)
+        self.entry_end_date.grid(row=4, column=1)
+        self.label_frequency.grid(row=5, column=0, sticky="e", pady=5)
+        self.entry_frequency.grid(row=5, column=1)
+        self.button_submit.grid(row=6, columnspan=2, pady=8)
 
     def submit_task(self):
         self.task_type = "Recurring Task"
