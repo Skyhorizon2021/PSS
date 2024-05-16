@@ -36,7 +36,7 @@ class MenuBar():
         edit.add_command(label="Edit Task", command=lambda: self.edit_task())
         edit.add_command(label="Find Task", command=lambda: self.find_task)
         edit.add_separator()
-        edit.add_command(label="Delete Task", command=lambda: self.del_task)
+        edit.add_command(label="Delete Task", command=lambda: self.del_task())
         menubar.add_cascade(label="Edit", menu=edit)
 
     def donothing(self):
@@ -67,7 +67,7 @@ class MenuBar():
         self.new_window = FindWindow()
 
     def del_task(self):
-        self.new_window = ""
+        self.new_window = DeleteWindow()
 
 class FileWindow(Toplevel):
     def __init__(self, master=None):
@@ -303,6 +303,31 @@ class EditWindow(Toplevel):
 
     def create_anti_task(self, task):
         self.new_window = AntiTaskWindow()
+
+class DeleteWindow(tk.Toplevel):
+    def __init__(self, master=None):
+        super().__init__(master=master)
+        self.title("Delete Task")
+        self.geometry("300x150")
+
+        frame = tk.Frame(self)
+        frame.pack(expand=True, fill=tk.BOTH)
+
+        self.label_task_name = tk.Label(frame, text="Task Name:")
+        self.entry_task_name = tk.Entry(frame)
+
+        self.button_delete = tk.Button(frame, text="Delete", command=self.delete_task)
+
+        self.label_task_name.pack(pady=5)
+        self.entry_task_name.pack(pady=5)
+        self.button_delete.pack(pady=10)
+
+    def delete_task(self):
+        task_name = self.entry_task_name.get()
+        # Call deleteTasks function with the task_name
+        deleteTasks(task_name)
+        messagebox.showinfo("Task Deleted", f"Task '{task_name}' has been deleted.")
+    
 
 class FindWindow(tk.Toplevel):
     def __init__(self, master=None):
