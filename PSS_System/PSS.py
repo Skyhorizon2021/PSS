@@ -1,170 +1,374 @@
-import sqlite3
+from Schedule import *
+from Models.RecurringModel import Recurring
+from Models.TransientModel import Transient
+from Models.AntiTaskModel import Anti
+from Checking import *
+import pymongo
+from bson.json_util import dumps
+import calendar
 
 class PSS:
 
-    @staticmethod
-    def createTask():
-        print("Select the type of task:\n1. Recurring\n2. Transcient\n3. Recurring")
-        selection = input(int())
-        match selection:
-            case 1:
-                # Entering parameters
-                name = input("Enter the name of the task: ")
-                taskType = "Recurring Task"
-                start = input(float("Enter the task's start time: "))
-                duration = input(float("Enter the task's duration: "))
-                startDate = input(float("Enter the task's start date: "))
-                endDate = input(int("Enter the task's end date: "))
-                frequency = input(int("Enter the task's frequency: "))
-                
-                # Creating recurring task
-                reTask = Recurring(name, start, duration, startDate, taskType,
-                endDate, frequency)
-                return reTask
-            case 2:
-                # Entering parameters
-                name = input("Enter the name of the task: ")
-                taskType = "Transcient Task"
-                start = input(float("Enter the task's start time: "))
-                duration = input(float("Enter the task's duration: "))
-                date = input(int("Enter the task's date: "))
+    def createTask(self, task):
+        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 
-                # Creating transient task
-                trTask = Transient(name, start, duration, date, taskType)
-                return trTask
-            case 3:
-                # Entering parameters
-                name = input("Enter the name of the task: ")
-                taskType = "Anti Task"
-                start = input(float("Enter the task's start time: "))
-                duration = input(float("Enter the task's duration: "))
-                date = input(int("Enter the task's date: "))
+        mydb = myclient["schedule"]
+        mycol = mydb["tasks"]
 
-                # Creating anti task
-                anTask = AntiTask(name, start, duration, date, taskType)
-                return anTask
+        mod = Checking()
+        if not mod.checkAll(task):
+            print("Invalid Attributes")
+            return False
 
+        newSche = Schedule.getData()
+
+        taskType = task.type
+        date = str(task.date)
+
+        # Task creation
+        match taskType:
+            case "Recurring Task":
+                # Get dates for recurring objects to be placed in
+                dates = mod.iterateDate(task.date, task.endDate, task.frequency)
+                if mod.noOverlapAdd(task):
+                    for days in dates:
+                        newIndex = mod.getTaskIndex(days)
+                        newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration,
+                                "EndDate":task.endDate, "Frequency":task.frequency}
+                        try: # Adds Recurring to Existing day
+                            newSche[str(days)][newIndex] = newdict
+                        except: # Creates a new day to add a recurring task
+                            newSche[str(days)] = {newIndex : {}}
+                            newSche[str(days)][newIndex] = newdict
+                        task.date = days
+                    mycol.replace_one({}, newSche)   
+                else:
+                    print("A task exists during this period")
+
+            case "Transient Task":
+                if mod.noOverlapAdd(task):
+                    newIndex = mod.getTaskIndex(task.date)
+                    newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
+                    try:
+                        newSche[date][newIndex] = newdict
+                    except:
+                        newSche[date] = {newIndex : {}}
+                        newSche[date][newIndex] = newdict
+                    mycol.replace_one({}, newSche)
+                else:
+                    print("Task exists during this period")
+
+            case "Anti Task":
+                if mod.checkRecurring(task):
+                    newIndex = mod.getTaskIndex(task.date)
+                    newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
+                    newSche[date][newIndex] = newdict
+                    mycol.replace_one({}, newSche)
+                else:
+                    print("Recurring Task does not exist")
+        return True
 
     def viewTask():
-        name = input("Enter the task name: ") # can also do 'def viewTask(name)' instead
-        # Connect to database
-        con = sqlite3.connect('schedule.db')
-        cur = con.cursor()
+        name = input("Enter the task name: ")
+        
+        # Gets the schedule
+        listSche = Schedule.getData()
 
-        # Select Name to match the search
-        cur = con.execute("SELECT Name from schedule")
-        for row in cur:
-            # Display the match
-            if row[0] == name:
-                # Format display later
-                print(row)
+        for days in listSche:
+            task = listSche[days]
+            for detail in task:
+                if name == task[detail]['Name']:
+                    print("Name: ", task[detail]['Name'])
+                    print("Type: ", task[detail]['Task Type'])
+                    print("Date: ", days)
+                    print("Time: ", task[detail]['Time'])
+                    print("Duration: ", task[detail]['Duration'])
+                    if task[detail]["Task Type"] == "Recurring":
+                        print("End Date: ", task[detail]['EndDate'])
+                        print('Frequency: ', task[detail]['Frequency'])
                 break
-        con.close()
+
+    def deleteTask(self, name):
         
-    def deleteTask():
-        name = input("Enter the task name: ") # can also do 'def viewTask(name)' instead
-        
-        # Connect to database
-        con = sqlite3.connect('schedule.db')
-        cur = con.cursor()
+        # Gets the schedule
+        listSche = Schedule.getData()
+        tempSche = Schedule.getData()
+
         # Search for task name
+        for days in listSche:
+            task = listSche[days]
+            for detail in task:
+                # Matching task name
+                if name == task[detail]['Name']:
+                    key_list = list(listSche[days].keys())
+                    value_list = list(listSche[days].values())
+                    date = days
+                    taskDet = task
+                    # Matching task type 
+                    taskType = task[detail]["Task Type"]
+                    start = task[detail]["Time"]
+                    dur = task[detail]["Duration"]
+                    if taskType == "Recurring Task":
+                        end = task[detail]["EndDate"]
+                        freq = task[detail]["Frequency"]
 
-        # Search for task type
+                    matchTask = task[detail]
+                
+                    value = value_list.index(matchTask)
+        # Gets the key value for the task
+        x = key_list[value]
+        
+        # Searching inside database
+        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 
-        #If recurring, check for anti task to delete with
+        mydb = myclient["schedule"]
+        mycol = mydb["tasks"]
 
-        # If antitask, check if delete it will cause an overlap
-        # and causing conflict between two tasks
-        # Generate an error message if it is not deleted
-        pass
-    def editTask():
-        # Check for task name
+        query = {date : taskDet}
+        mod = Checking()
 
-        # Display current attributes
+        match taskType:
+            case "Recurring Task":
+                try:
+                    checkingTask = Recurring(name, start, dur, date, taskType, end, freq)
+                    antiName = mod.checkAnti(checkingTask)
+                    if antiName != "":
+                        self.deleteTask(antiName)
+                    del tempSche[date][x]
+                    # Deletes the day from schedule if no tasks are stored
+                    if tempSche[date] == {}:
+                        del tempSche[date]
+                    # Replaces the day with the new day schedule
+                    mycol.replace_one(query, tempSche)
+                    # Continue to delete all instances of the task with its name
+                    self.deleteTask(name)
+                except:
+                    print("Deleted all occurances of {}".format(name))
+                    pass
+            case "Anti Task":
+                checkingTask = Anti(name, start, dur, date, taskType)
+                # Checks if deleting antitask will not cause conflict
+                if mod.noOverlapAnti(checkingTask):
+                    del tempSche[date][x]
+                    if tempSche[date] == {}:
+                        del tempSche[date]
+                    # Replaces the day with the new day schedule
+                    mycol.replace_one(query, tempSche)
+                else:
+                    print("Conflicting tasks upon deletion. Operation terminated...")
+            # Just deletes the task, no checking required
+            case "Transient Task":
+                del tempSche[date][x]
+                if tempSche[date] == {}:
+                    del tempSche[date]
+                mycol.replace_one(query, tempSche)
 
-        # Make changes to attributes
+    def editTask(self, oldtask, newtask):
+        mod = Checking()
+               
+        taskType = newtask.type
+        name = newtask.name
+        date = newtask.date
+        time = mod.convertTime(newtask.time)
+        duration = newtask.duration
+        if taskType == "Recurring":
+            end = newtask.endDate
+            freq = newtask.frequency
 
-        # Verify that there is not overlap nor invalid changes
+        # Remove old task for checking
+        self.deleteTask(oldtask.name)
 
-        # Confirm edits
-        pass
+        # Checks all values for validity 
+        if mod.checkName(name) and mod.checkDate(date) and mod.checkDate(end) and mod.validDuration(duration) and mod.validTime(time) and mod.checkFreq(freq) and mod.checkType(taskType):
+            match taskType:
+                # Checks all types of tasks for overlap and (re)creates tasks if no overlap
+                case "Transient Task":
+                    checkingtask = Transient(name, time, duration, date, taskType)
+                    if mod.noOverlapAdd(checkingtask):
+                        self.createTask(newtask)
+                    else:
+                        self.createTask(oldtask)
+                case "Recurring Task":
+                    checkingtask = Recurring(name, time, duration, date, taskType, end, freq)
+                    if mod.noOverlapAdd(checkingtask):
+                        self.createTask(newtask)
+                    else:
+                        self.createTask(oldtask)
+                case "Anti Task":
+                    checkingtask = Anti(name, time, duration, date, taskType)
+                    if mod.noOverlapAdd(checkingtask):
+                        self.createTask(newtask)
+                    else:
+                        self.createTask(oldtask)
+        else:
+            # Unspecified Task Error
+            print("Error in task's value")
 
-    def writeToFile():
-        filename = input("Enter a file name: ")
-        # Validate file name (either create new or exisiting)
+    def writeToFile(filename):
+        # Connects to database to retrieve data
+        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+
+        mydb = myclient["schedule"]
+        mycol = mydb["tasks"]
+        cur = mycol.find_one()
 
         # Print to file
+        try:
+            with open(filename, 'w') as jsonfile:
+                json.dump(json.load(dumps(cur)), jsonfile)
+        except FileNotFoundError:
+            print("File does not exist")
 
-    def readFromFile():
-        # Search for file name
+    def readFromFile(filename):
+        Schedule.loadData(filename)
 
-        # Validate format and no overlap
+    def viewDaySchedule(self, date):
+        mod = Checking()
 
-        # Load task from JSON to schedule
-        pass
-
-    def viewDaySchedule():
-        # Checks for file name
-
-        # Checks for start date
-
-        # Check for antitasks (no display purposes)
-
-        # Print out the day schedule
-
-        pass
-
-    def viewWeekSchedule():
-        # Checks for file name
-
-        # Checks for start date
-
-        # Check for antitasks (no display purposes)
-
-        # Loop for 7 days, print out day schedule
-        pass
-
-    def viewMonthSchedule():
-        # Checks for file name
-
-        # Checks for start of the month
-
-        # Check for antitasks (no display purposes)
-
-        # Loop for 30 days, print out day schedule
-        pass
-
-    def writeDaySchedule():
-        # Checks for file name
-
-        # Checks for start date
-
-        # Check for antitasks (no display purposes)
-
-        # Write day schedule to file
-        pass
-
-    def writeWeekSchedule():
-        # Checks for file name
-
-        # Checks for start date
-
-        # Check for antitasks (no display purposes)
-
-        # Loop for 7 days, write day schedule to file
-        pass
-
-    def writeMonthSchedule():
-        # Checks for file name
-
-        # Checks for start of the month
-
-        # Check for antitasks (no display purposes)
-
-        # Loop for 30 days, write day schedule to file
-        pass
-# Just written down the required methods from our PSS diagrams
-
-    def noOverlap():
+        listSche = mod.hideAnti(date)
+        tempSche = mod.hideAnti(date)
         
-        pass
+        sortedTasks = []
+        sortedSchedule = []
+        try:
+            while listSche[date] != {}:
+                minTime = 24
+                for tasks in listSche[date]:
+                    start = mod.convertTime(listSche[date][tasks]['Time'])
+                    # Gets the earliest start time
+                    if start < minTime:
+                        minTime = start
+                        selectTask = tasks
+                # Deletes the earliest task for iteration
+                del listSche[date][selectTask]
+                # Appends if task's time is the earliest
+                for tasks in tempSche[date]:
+                        if mod.convertTime(tempSche[date][tasks]['Time']) == minTime:
+                            sortedTasks.append(tasks)
+                            break
+            
+            # Returns the task objects in a sorted array
+            i = 0
+            for tasks in sortedTasks:
+                if tasks == sortedTasks[i]:
+                    sortedSchedule.append(tempSche[date][tasks])
+                i += 1
+        except:
+            # Day does not exists and will not add to added
+            pass
+        if sortedSchedule != []:
+            return {date : sortedSchedule}
+        else:
+            return None
+
+    def viewWeekSchedule(self, date):
+        mod = Checking()
+        sortedWeek = []
+
+        # Appends a day's schedule to the week schedule
+        # Will not load days without tasks
+        for i in range(7):
+            nextday =str(mod.formatDate(str(int(date)+i)))
+            sortedDay = self.viewDaySchedule(nextday)
+            if sortedDay != None:
+                sortedWeek.append(sortedDay)
+
+        return sortedWeek
+
+    def viewMonthSchedule(self, date):
+        mod = Checking()
+        sortedMonth = []
+        day = mod.separateDate(date)
+
+        endOfMonth = calendar.monthrange(day[0], day[1])[1]
+        # Formats month if less than 10 and returns them to the start of the month for iteration
+        if day[1] < 10:
+            newDate = str(day[0]) + "0" + str(day[1]) + "01"
+        else:
+            newDate = str(day[0]) + str(day[1]) + "01"
+
+        # Appends a day's schedule to the week schedule
+        # Will not load days without tasks
+        for i in range(endOfMonth):
+            nextday =str(mod.formatDate(str(int(newDate)+i)))
+            sortedDay = self.viewDaySchedule(nextday)
+            if sortedDay != None:
+                sortedMonth.append(sortedDay)
+        
+        return sortedMonth
+
+    def writeDaySchedule(self, filename, date):
+        mod = Checking()
+
+        listSche = mod.hideAnti(date)
+        tempSche = mod.hideAnti(date)
+        
+        sortedTasks = []
+        sortedSchedule = []
+        try:
+            while listSche[date] != {}:
+                minTime = 24
+                for tasks in listSche[date]:
+                    start = mod.convertTime(listSche[date][tasks]['Time'])
+                    # Gets the earliest start time
+                    if start < minTime:
+                        minTime = start
+                        selectTask = tasks
+                    #if listSche[date][tasks]['Task Type'] == "Recurring Task":
+                        #mycol.replace_one()
+                # Deletes the earliest task for iteration
+                del listSche[date][selectTask]
+                # Appends if task's time is the earliest
+                for tasks in tempSche[date]:
+                        if mod.convertTime(tempSche[date][tasks]['Time']) == minTime:
+                            sortedTasks.append(tasks)
+                            break
+            
+            # Returns the task objects in a sorted array
+            i = 0
+            for tasks in sortedTasks:
+                if tasks == sortedTasks[i]:
+                    sortedSchedule.append(tempSche[date][tasks])
+                i += 1
+            
+            for detail in sortedSchedule:
+                del detail['EndDate']
+                del detail['Frequency']
+
+        except:
+            # Day does not exists and will not add to added
+            pass
+        
+        # Print to file
+        try:
+            with open(filename, 'w') as jsonfile:
+                json.dump({date : sortedSchedule}, jsonfile)
+        except FileNotFoundError:
+            print("File does not exist")
+
+    def writeWeekSchedule(self, filename, date):
+        mod = Checking()
+
+        # Appends a day's schedule to the week schedule
+        # Will not load days without tasks
+        for i in range(7):
+            nextday =str(mod.formatDate(str(int(date)+i)))
+            self.writeDaySchedule(filename, nextday)
+
+    def writeMonthSchedule(self, filename, date):
+        mod = Checking()
+
+        day = mod.separateDate(date)
+
+        endOfMonth = calendar.monthrange(day[0], day[1])[1]
+        # Formats month if less than 10 and returns them to the start of the month for iteration
+        if day[1] < 10:
+            newDate = str(day[0]) + "0" + str(day[1]) + "01"
+        else:
+            newDate = str(day[0]) + str(day[1]) + "01"
+
+        # Appends a day's schedule to the week schedule
+        # Will not load days without tasks
+        for i in range(endOfMonth):
+            nextday =str(mod.formatDate(str(int(newDate)+i)))
+            self.writeDaySchedule(filename, nextday)
