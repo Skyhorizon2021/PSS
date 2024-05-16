@@ -8,7 +8,7 @@ class Schedule:
         mydb = myclient["schedule"]
         mycol = mydb["tasks"]
 
-        with open("Resources//db_example.json") as file:
+        with open(filename) as file:
             file_data = json.load(file)
 
         mycol.insert_many(file_data)

@@ -205,18 +205,14 @@ class PSS:
 
     def writeToFile(filename):
         # Connects to database to retrieve data
-        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-
-        mydb = myclient["schedule"]
-        mycol = mydb["tasks"]
-        cur = mycol.find_one()
+        listSche = Schedule.getData()
 
         # Print to file
         try:
             with open(filename, 'w') as jsonfile:
-                json.dump(json.load(dumps(cur)), jsonfile)
+                json.dump(listSche, jsonfile)
         except FileNotFoundError:
-            print("File does not exist")
+            print("File does not exist") 
 
     def readFromFile(filename):
         Schedule.loadData(filename)
@@ -371,6 +367,4 @@ class PSS:
         for i in range(endOfMonth):
             nextday =str(mod.formatDate(str(int(newDate)+i)))
             self.writeDaySchedule(filename, nextday)
-
-PSS.viewTask("A")
 
