@@ -3,7 +3,7 @@ from tkinter import messagebox
 from tkinter import *
 from tkinter import filedialog
 
-#from PSS import *
+from PSS import *
 from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
@@ -144,16 +144,19 @@ class DisplayWindow(Toplevel):
 class ScheduleFrame(tk.Frame):
     def __init__(self, parent, type, day):        
         tk.Frame.__init__(self, parent)
-
+        PSS_instance = PSS()
         #use PSS to display using viewDaySchedule, viewWeekSchedule, viewMonthSchedule
 
         output = ""
         if type == 0:
             self.label = Label(self, text="This will show day " + output)
+            PSS_instance.viewDaySchedule(day)
         elif type == 1:
             self.label = Label(self, text="This will show week " + output)
+            PSS_instance.viewWeekSchedule(day)
         elif type == 2:
             self.label = Label(self, text="This will show month " + output)
+            PSS_instance.viewMonthSchedule(day)
         else:
             self.label = Label(self.frame, text='')
         self.label.pack()
