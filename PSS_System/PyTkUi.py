@@ -297,7 +297,6 @@ class EditWindow(Toplevel):
         self.tran_button = Button(self, text="Transient Task", command=lambda: self.create_transient_task(task))
         self.anti_button = Button(self, text="Anti Task", command=lambda: self.create_anti_task(task))
 
-        self.label.place(relx=.5, rely=.3, anchor = CENTER)
         self.next.place(relx=.5, rely=.4, anchor = CENTER)
         self.recur_button.place(relx=.5, rely=.5, anchor = CENTER)
         self.tran_button.place(relx=.5, rely=.6, anchor = CENTER)
