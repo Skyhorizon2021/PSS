@@ -69,24 +69,25 @@ class PSS:
         return True
 
     def viewTask():
-        name = input("Enter the task name: ")
-        
-        # Gets the schedule
+        #name = input("Enter the task name: ")
+        name = ""
         listSche = Schedule.getData()
-
+        found = False
+        
         for days in listSche:
             task = listSche[days]
             for detail in task:
                 if name == task[detail]['Name']:
-                    print("Name: ", task[detail]['Name'])
-                    print("Type: ", task[detail]['Task Type'])
-                    print("Date: ", days)
-                    print("Time: ", task[detail]['Time'])
-                    print("Duration: ", task[detail]['Duration'])
+                    taskname = task[detail]['Name']
+                    taskType = task[detail]['Task Type']
+                    taskDate = days
+                    taskTime = task[detail]['Time']
+                    taskDur = task[detail]['Duration']
                     if task[detail]["Task Type"] == "Recurring":
-                        print("End Date: ", task[detail]['EndDate'])
-                        print('Frequency: ', task[detail]['Frequency'])
-                break
+                        end = task[detail]['EndDate']
+                        freq = task[detail]['Frequency']
+                        return Recurring(taskname, taskTime, taskDur, taskDate, taskType, end, freq)
+                return Transient(taskname, taskTime, taskDur, taskDate, taskType)
 
     def deleteTask(self, name):
         
@@ -372,3 +373,5 @@ class PSS:
         for i in range(endOfMonth):
             nextday =str(mod.formatDate(str(int(newDate)+i)))
             self.writeDaySchedule(filename, nextday)
+
+PSS.viewTask()
