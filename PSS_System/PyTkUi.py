@@ -125,12 +125,13 @@ class ScheduleFrame(tk.Frame):
 
         #use PSS to display using viewDaySchedule, viewWeekSchedule, viewMonthSchedule
 
+        output = ""
         if type == 0:
-            self.label = Label(self, text="This will show day " + day)
+            self.label = Label(self, text="This will show day " + output)
         elif type == 1:
-            self.label = Label(self, text="This will show week " + day)
+            self.label = Label(self, text="This will show week " + output)
         elif type == 2:
-            self.label = Label(self, text="This will show month " + day)
+            self.label = Label(self, text="This will show month " + output)
         else:
             self.label = Label(self.frame, text='')
         self.label.pack()
@@ -299,6 +300,7 @@ class EditWindow(Toplevel):
     def search(self):
         #task = PSS.viewTask(self.entry.get())
         #turn task into a string, assign to output, else give error
+        task = ""
         output = ""
         print(self.entry.get())
 
@@ -307,9 +309,9 @@ class EditWindow(Toplevel):
         self.label.destroy()
 
         self.next = Label(self, text="What type of task would you like to create?")
-        self.recur_button = Button(self, text="Recurring Task", command=self.create_recurring_task)
-        self.tran_button = Button(self, text="Transient Task", command=self.create_transient_task)
-        self.anti_button = Button(self, text="Anti Task", command=self.create_anti_task)
+        self.recur_button = Button(self, text="Recurring Task", command=lambda: self.create_recurring_task(task))
+        self.tran_button = Button(self, text="Transient Task", command=lambda: self.create_transient_task(task))
+        self.anti_button = Button(self, text="Anti Task", command=lambda: self.create_anti_task(task))
 
         self.label.place(relx=.5, rely=.3, anchor = CENTER)
         self.next.place(relx=.5, rely=.4, anchor = CENTER)
@@ -317,14 +319,16 @@ class EditWindow(Toplevel):
         self.tran_button.place(relx=.5, rely=.6, anchor = CENTER)
         self.anti_button.place(relx=.5, rely=.7, anchor = CENTER)
     
-    def create_recurring_task(self):
+    def create_recurring_task(self, task):
         self.new_window = RecurringTaskWindow()
         #call delete function for the searched task
+        #PSS.delete(task)
+        #self.destroy() destroys EditWindow
 
-    def create_transient_task(self):
+    def create_transient_task(self, task):
         self.new_window = TransientTaskWindow()
 
-    def create_anti_task(self):
+    def create_anti_task(self, task):
         self.new_window = AntiTaskWindow()
 
 class FindWindow(tk.Toplevel):
