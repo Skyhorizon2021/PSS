@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import *
 from tkinter import filedialog
 
+from PSS import *
 
 class MenuBar():
     def __init__(self, window):
@@ -138,6 +139,8 @@ class DisplayWindow(Toplevel):
             self.label = Label(self.frame, text="Starting Date for Week to Display (YYYYMMDD):")
         elif type == 2:
             self.label = Label(self.frame, text="Starting Date for Month to Display (YYYYMMDD):")
+        else:
+            self.label = Label(self.frame, text='')
         self.entry = tk.Entry(self.frame)
 
         self.label.pack()
@@ -154,7 +157,7 @@ class DisplayWindow(Toplevel):
         self.destroy()
 
 class ScheduleFrame(tk.Frame):
-    def __init__(self, parent, type, day):
+    def __init__(self, parent, type, day):        
         tk.Frame.__init__(self, parent)
         if type == 0:
             self.label = Label(self, text="This will show day " + day)
@@ -162,6 +165,8 @@ class ScheduleFrame(tk.Frame):
             self.label = Label(self, text="This will show week " + day)
         elif type == 2:
             self.label = Label(self, text="This will show month " + day)
+        else:
+            self.label = Label(self.frame, text='')
         self.label.pack()
 
 class MainWindow(tk.Tk):
