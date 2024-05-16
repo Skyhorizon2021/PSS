@@ -22,3 +22,5 @@ class Schedule:
         x = mycol.find_one()
         del x['_id']
         return x
+
+#Schedule.loadData('Resources//db_example.json')
