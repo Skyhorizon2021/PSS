@@ -26,4 +26,3 @@ class Schedule:
             del doc['_id']
             schedule.append(doc)
         return schedule
-Schedule.getData()

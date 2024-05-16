@@ -31,9 +31,9 @@ class Checking:
         return True
 
     # Validates correct task type
-    def checkType(self, type):
-        taskTypes = ["Anti Task", "Recurring Task", "Transient Task"]
-        if type in taskTypes:
+    def checkType(self, tasktype):
+        taskTypes = ["Class", "Study", "Sleep", "Exercise", "Work", "Meal", "Visit", "Shopping", "Appointment", "Cancellation"]
+        if tasktype in taskTypes:
             return True
         else:
             return False
@@ -405,6 +405,12 @@ class Checking:
             x = listSche[date]
         except:
             return None
+
+        for task in listSche:
+            if task['StartDate'] == date:
+                if task['Type'] == "Cancellation":
+                    anti = task
+                
 
         for tasks in listSche[date]:
             y = listSche[date][tasks]
