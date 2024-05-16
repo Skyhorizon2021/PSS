@@ -71,7 +71,6 @@ class PSS:
     def viewTask(name):
      
         listSche = Schedule.getData()
-        found = False
         
         for days in listSche:
             task = listSche[days]
@@ -86,7 +85,7 @@ class PSS:
                         end = task[detail]['EndDate']
                         freq = task[detail]['Frequency']
                         return Recurring(taskname, taskTime, taskDur, taskDate, taskType, end, freq)
-                return Transient(taskname, taskTime, taskDur, taskDate, taskType)
+                    return Transient(taskname, taskTime, taskDur, taskDate, taskType)
 
     def deleteTask(self, name):
         
@@ -373,4 +372,4 @@ class PSS:
             nextday =str(mod.formatDate(str(int(newDate)+i)))
             self.writeDaySchedule(filename, nextday)
 
-PSS.viewTask()
+PSS.viewTask("A")

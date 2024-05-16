@@ -8,10 +8,10 @@ class Schedule:
         mydb = myclient["schedule"]
         mycol = mydb["tasks"]
 
-        with open(filename) as file:
+        with open("Resources//Set1.json") as file:
             file_data = json.load(file)
 
-        mycol.insert_one(file_data)
+        mycol.insert_many(file_data)
     
     def getData():
         myclient = pymongo.MongoClient("mongodb://localhost:27017/")
@@ -19,6 +19,11 @@ class Schedule:
         mydb = myclient["schedule"]
         mycol = mydb["tasks"]
 
-        x = mycol.find_one()
-        del x['_id']
-        return x
+        schedule = []
+
+        x = mycol.find()
+        for doc in x:
+            del doc['_id']
+            schedule.append(doc)
+        return schedule
+Schedule.getData()
