@@ -2,7 +2,7 @@ from Schedule import *
 from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
-import Checking
+from Checking import Checking
 import pymongo
 from bson.json_util import dumps
 import calendar

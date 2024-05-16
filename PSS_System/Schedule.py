@@ -8,6 +8,7 @@ class Schedule:
         mydb = myclient["schedule"]
         mycol = mydb["tasks"]
 
+
         with open(filename) as file:
             file_data = json.load(file)
 
@@ -26,5 +27,3 @@ class Schedule:
             del doc['_id']
             schedule.append(doc)
         return schedule
-
-
