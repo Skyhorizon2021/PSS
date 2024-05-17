@@ -82,11 +82,13 @@ class PSS:
                     if antiName != "":
                         self.deleteTask(antiName)
                     query = {'Name':name}
+                    mycol.delete_one(query)
                 elif Checking.isTran(task):
                     query = {'Name':name}
+                    mycol.delete_one(query)
                 elif Checking.isAnti(task) and mod.noOverlapAnti(task):
                     query = {'Name':name}
-                mycol.delete_one(query)
+                    mycol.delete_one(query)
 
     def editTask(self, oldtask, newtask):
         mod = Checking()
