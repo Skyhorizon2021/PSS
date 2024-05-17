@@ -244,28 +244,32 @@ class TransientTaskWindow(CreateWindow):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Transient Task")
-
+        self.PSS_instance = PSS()
+        
     def submit_task(self):
         super().submit_task()
         task = Transient(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.entry_type.get())
+        self.PSS_instance.createTask(task)
         messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class AntiTaskWindow(CreateWindow):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Anti Task")
-
+        self.PSS_instance = PSS()
+        
     def submit_task(self):
         self.task_type = "Anti Task"
         super().submit_task()
         task = Anti(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.entry_type.get())
+        self.PSS_instance.createTask(task)
         messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class RecurringTaskWindow(CreateWindow):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Recurring Task")
-
+        self.PSS_instance = PSS()
         # Add additional fields specific to Recurring Tasks
         self.label_end_date = tk.Label(self.frame, text="End Date (YYYYMMDD):")
         self.label_frequency = tk.Label(self.frame, text="Frequency:")
@@ -283,6 +287,7 @@ class RecurringTaskWindow(CreateWindow):
         self.task_type = "Recurring Task"
         super().submit_task()
         task = Recurring(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_type.get(), self.entry_end_date.get(), self.entry_frequency.get())
+        self.PSS_instance.createTask(task)
         messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
 
 class EditWindow(Toplevel):
@@ -337,7 +342,7 @@ class DeleteWindow(tk.Toplevel):
         super().__init__(master=master)
         self.title("Delete Task")
         self.geometry("300x150")
-
+        self.PSS_instance = PSS()
         frame = tk.Frame(self)
         frame.pack(expand=True, fill=tk.BOTH)
 
@@ -353,7 +358,7 @@ class DeleteWindow(tk.Toplevel):
     def delete_task(self):
         task_name = self.entry_task_name.get()
         # Call deleteTasks function with the task_name
-        #deleteTasks(task_name)
+        self.PSS_instance.deleteTask(task_name)
         messagebox.showinfo("Task Deleted", f"Task '{task_name}' has been deleted.")
     
 class FindWindow(tk.Toplevel):

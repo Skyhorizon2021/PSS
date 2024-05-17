@@ -183,7 +183,7 @@ class Checking:
         return True
 
     # Check if antitasks deletion overlap
-    def noOverlapAdd(self, task):
+    def noOverlapAnti(self, task):
         listsche = Schedule.getData()
         
         # Retrieve Task's start date, start time,  and duration, and calculates its end time
@@ -236,13 +236,11 @@ class Checking:
         return True
 
     # Checks if any recurring tasks have an antitask (for deleting recurring task)
-    def checkAnti(self, antitask):
+    def checkAnti(self, recurTask):
         listSche = Schedule.getData()
 
-        date = antitask['Date']
-
         for task in listSche:
-            if task['StartTime'] == antitask['StartTime'] and antitask['Duration'] == task['Duration']:
+            if task['StartTime'] == recurTask['StartTime'] and recurTask['Duration'] == task['Duration'] and Checking.isAnti(task):
                 return task['Name']
 
         return ""
