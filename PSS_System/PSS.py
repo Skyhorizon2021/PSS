@@ -2,7 +2,8 @@ from Schedule import *
 from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
-from Checking import Checking
+from Checking import *
+from UpdatedChecking import *
 import pymongo
 from bson.json_util import dumps
 import calendar
@@ -61,7 +62,6 @@ class PSS:
         
         # Gets the schedule
         listSche = Schedule.getData()
-        tempSche = Schedule.getData()
 
         mod = Checking()
 
@@ -141,24 +141,28 @@ class PSS:
         Schedule.loadData(filename)
 
     def viewDaySchedule(self, date):
-        mod = Checking()
         mod2 = UpdatedChecking()
-        listSche = mod.hideAnti(date)
+        listSche = mod2.hideAnti(date)
         
         daySche = []
         sortedSchedule = []
+        date = int(date)
         
-        mod2.iterateDate()
-
         for task in listSche:
-            if UpdatedChecking.isRecurring(task):
-                if task['StartDate'] == date:
-                    daySche.append({"Name":task['Name'], "Type":task['Type'], "StartDate":task['StartDate'], "StartTime":task['StartTime'], "Duration":task['Duration']})
-            elif task['Date'] == date:
-                daySche.append({"Name":task['Name'], "Type":task['Type'], "Date":task['Date'], "StartTime":task['StartTime'], "Duration":task['Duration']})
 
-        tasknum = len(daySche)
-        
+            if UpdatedChecking.isRecurring(task):
+                dates = mod2.iterateDate(task['StartDate'], task['EndDate'], task['Frequency'])
+                if date in dates:
+                    checktask = task['Name']
+                    for task2 in listSche:
+                        if UpdatedChecking.isRecurring(task) and checktask == task['Name']:
+                            daySche.append({"Name":task['Name'], "Type":task['Type'], "Date":date, "StartTime":task['StartTime'], "Duration":task['Duration']})
+                            break                    
+            else:
+                checkDate = date
+                if task['Date'] == date:
+                    daySche.append({"Name":task['Name'], "Type":task['Type'], "Date":date, "StartTime":task['StartTime'], "Duration":task['Duration']})
+
         while True:
             minTime = 24
             # Get the earliest time
@@ -174,8 +178,7 @@ class PSS:
             # Breaks when all tasks are sorted in the schedule
             if daySche == []:
                 break
-            
-            return sortedSchedule
+        return sortedSchedule
 
     def viewWeekSchedule(self, date):
         mod = Checking()
