@@ -4,7 +4,7 @@ from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
 
-class UpdatedChecking:
+class Checking:
 
     # Returns boolean value if date is valid
     def checkDate(self, date):
@@ -277,16 +277,17 @@ class UpdatedChecking:
     # For viewing task
     def hideAnti(self, date):
         listSche = Schedule.getData()
+        tempSche = Schedule.getData()
 
         for task in listSche:
             # Checking for antitask in schedule
-            if UpdatedChecking.isAnti(task) and task['Date'] == date:
+            if Checking.isAnti(task) and task['Date'] == date:
                 taskStart = task['StartTime']
                 taskDura = task['Duration']
                 tempSche.remove(task)
                 # Search for recurring to match
                 for matchtask in tempSche:
-                    if matchtask['StartTime'] == taskStart and matchtask['Duration'] == taskDura and UpdatedChecking.isRecurring(matchtask):
+                    if matchtask['StartTime'] == taskStart and matchtask['Duration'] == taskDura and Checking.isRecurring(matchtask):
                         # Get recurring dates
                         datesRE = self.iterateDate(matchtask['StartDate'], matchtask['EndDate'], matchtask['Frequency'])
                         for days in datesRE:

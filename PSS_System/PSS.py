@@ -3,10 +3,6 @@ from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
 from Checking import *
-<<<<<<< Updated upstream
-from UpdatedChecking import *
-=======
->>>>>>> Stashed changes
 import pymongo
 from bson.json_util import dumps
 import calendar
@@ -31,12 +27,12 @@ class PSS:
 
         # Task Creation
         if mod.noOverlapAdd(task):
-            if UpdatedChecking.isRecurring(task):
+            if Checking.isRecurring(task):
                 newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration,
                                 "EndDate":task.endDate, "Frequency":task.frequency}
-            elif UpdatedChecking.isTran(task):
+            elif Checking.isTran(task):
                 newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
-            elif UpdatedChecking.isAnti(task) and mod.checkRecurring(task):
+            elif Checking.isAnti(task) and mod.checkRecurring(task):
                 newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
             mycol.insert_one(newdict)
         else:
@@ -55,7 +51,7 @@ class PSS:
                 taskDate = task['StartDate']
                 taskTime = task['StartTime']
                 taskDur = task['Duration']
-                if UpdatedChecking.isRecurring(task):
+                if Checking.isRecurring(task):
                     end = task['EndDate']
                     freq = task['Frequency']
                     return Recurring(taskname, taskTime, taskDur, taskDate, taskType, end, freq)
@@ -77,14 +73,14 @@ class PSS:
         # Search for task name
         for task in listSche:
             if task['Name'] == name:
-                if UpdatedChecking.isRecurring(task):
+                if Checking.isRecurring(task):
                     antiName = mod.checkAnti(task)
                     if antiName != "":
                         self.deleteTask(antiName)
                     query = {'Name':name}
-                elif UpdatedChecking.isTran(task):
+                elif Checking.isTran(task):
                     query = {'Name':name}
-                elif UpdatedChecking.isAnti(task) and mod.noOverlapAnti(task):
+                elif Checking.isAnti(task) and mod.noOverlapAnti(task):
                     query = {'Name':name}
                 mycol.delete_one(query)
 
@@ -144,31 +140,20 @@ class PSS:
         Schedule.loadData(filename)
 
     def viewDaySchedule(self, date):
-<<<<<<< Updated upstream
-        mod2 = UpdatedChecking()
-        listSche = mod2.hideAnti(date)
-=======
         mod = Checking()
         listSche = mod.hideAnti(date)
->>>>>>> Stashed changes
         
         daySche = []
         sortedSchedule = []
         date = int(date)
-        
-<<<<<<< Updated upstream
-=======
-        mod.iterateDate()
-
->>>>>>> Stashed changes
         for task in listSche:
 
-            if UpdatedChecking.isRecurring(task):
+            if Checking.isRecurring(task):
                 dates = mod2.iterateDate(task['StartDate'], task['EndDate'], task['Frequency'])
                 if date in dates:
                     checktask = task['Name']
                     for task2 in listSche:
-                        if UpdatedChecking.isRecurring(task) and checktask == task['Name']:
+                        if Checking.isRecurring(task) and checktask == task['Name']:
                             daySche.append({"Name":task['Name'], "Type":task['Type'], "Date":date, "StartTime":task['StartTime'], "Duration":task['Duration']})
                             break                    
             else:
@@ -240,7 +225,7 @@ class PSS:
         mod.iterateDate()
 
         for task in listSche:
-            if UpdatedChecking.isRecurring(task):
+            if Checking.isRecurring(task):
                 if task['StartDate'] == date:
                     daySche.append({"Name":task['Name'], "Type":task['Type'], "StartDate":task['StartDate'], "StartTime":task['StartTime'],
                      "Duration":task['Duration'], "EndDate":task['EndDate'], "Frequency":task['Frequency']})
