@@ -144,6 +144,7 @@ class DisplayWindow(Toplevel):
 class ScheduleFrame(tk.Frame):
     def __init__(self, parent, type, day):        
         tk.Frame.__init__(self, parent)
+<<<<<<< Updated upstream
 
         #use PSS to display using viewDaySchedule, viewWeekSchedule, viewMonthSchedule
         PSS_instance = PSS()
@@ -152,9 +153,28 @@ class ScheduleFrame(tk.Frame):
             for i in range(len(daySchedule)):
                 output = str(daySchedule[i])
                 self.label = Label(self, text="This will show day\n" + output)
+=======
+        PSS_instance = PSS()
+
+        #use PSS to display using viewDaySchedule, viewWeekSchedule, viewMonthSchedule
+        output = ""
+        if type == 0:
+            schedule = PSS_instance.viewDaySchedule(day)
+            for task in schedule:
+                output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
+            self.label = Label(self, text="This will show day\n" + output)
+>>>>>>> Stashed changes
         elif type == 1:
+            schedule = PSS_instance.viewWeekSchedule(day)
+            for i in range(len(schedule)):
+                for task in schedule[i]:
+                    output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
             self.label = Label(self, text="This will show week " + output)
         elif type == 2:
+            schedule = PSS_instance.viewMonthSchedule(day)
+            for i in range(len(schedule)):
+                for task in schedule[i]:
+                    output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
             self.label = Label(self, text="This will show month " + output)
         else:
             self.label = Label(self.frame, text='')
@@ -170,6 +190,7 @@ class CreateWindow(tk.Toplevel):
         frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
         # Labels
+<<<<<<< Updated upstream
         self.label_task_name = tk.Label(frame, text="Task Name:")
         self.label_start_time = tk.Label(frame, text="Start Time (HH:MM):")
         self.label_duration = tk.Label(frame, text="Duration (minutes):")
@@ -180,6 +201,20 @@ class CreateWindow(tk.Toplevel):
         self.entry_start_time = tk.Entry(frame)
         self.entry_duration = tk.Entry(frame)
         self.entry_date = tk.Entry(frame)
+=======
+        self.label_task_name = tk.Label(self.frame, text="Task Name:")
+        self.label_type = tk.Label(self.frame, text = "Task Type:")
+        self.label_start_time = tk.Label(self.frame, text="Start Time (HH:MM):")
+        self.label_duration = tk.Label(self.frame, text="Duration (minutes):")
+        self.label_date = tk.Label(self.frame, text="Date (YYYYMMDD):")
+
+        # Entries
+        self.entry_task_name = tk.Entry(self.frame)
+        self.entry_type = tk.Entry(self.frame)
+        self.entry_start_time = tk.Entry(self.frame)
+        self.entry_duration = tk.Entry(self.frame)
+        self.entry_date = tk.Entry(self.frame)
+>>>>>>> Stashed changes
 
         # Buttons
         self.button_submit = tk.Button(frame, text="Submit", command=self.submit_task)
@@ -188,14 +223,26 @@ class CreateWindow(tk.Toplevel):
         self.label_task_name.grid(row=0, column=0, sticky="e", pady=5)
         self.label_start_time.grid(row=1, column=0, sticky="e", pady=5)
         self.label_duration.grid(row=2, column=0, sticky="e", pady=5)
+<<<<<<< Updated upstream
 
         # New labels layout
         self.label_date.grid(row=4, column=0, sticky="e", pady=5)
+=======
+        self.label_date.grid(row=3, column=0, sticky="e", pady=5)
+        self.label_type.grid(row=4, column=0, sticky="e", pady=5)
+>>>>>>> Stashed changes
 
         self.entry_task_name.grid(row=0, column=1)
         self.entry_start_time.grid(row=1, column=1)
         self.entry_duration.grid(row=2, column=1)
+<<<<<<< Updated upstream
         self.entry_date.grid(row=4, column=1)
+=======
+        self.entry_date.grid(row=3, column=1)
+        self.entry_type.grid(row=4, column=1)
+
+        self.button_submit.grid(row=5, columnspan=2, pady=8)
+>>>>>>> Stashed changes
 
         self.button_submit.grid(row=6, columnspan=2, pady=8)
 
@@ -238,7 +285,7 @@ class RecurringTaskWindow(CreateWindow):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Recurring Task")
-
+        
         # Add additional fields specific to Recurring Tasks
         self.label_end_date = tk.Label(self, text="End Date (YYYYMMDD):")
         self.label_frequency = tk.Label(self, text="Frequency:")
@@ -255,8 +302,13 @@ class RecurringTaskWindow(CreateWindow):
     def submit_task(self):
         self.task_type = "Recurring Task"
         super().submit_task()
+<<<<<<< Updated upstream
         task = Recurring(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get(), self.entry_end_date.get(), self.entry_frequency.get())
         messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
+=======
+        task = Recurring(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.task_type.get(), self.entry_end_date.get(), self.entry_frequency.get())
+        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
+>>>>>>> Stashed changes
 
 class EditWindow(Toplevel):
     def __init__(self, master=None):

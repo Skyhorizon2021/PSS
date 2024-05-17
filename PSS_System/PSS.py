@@ -3,7 +3,10 @@ from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
 from Checking import *
+<<<<<<< Updated upstream
 from UpdatedChecking import *
+=======
+>>>>>>> Stashed changes
 import pymongo
 from bson.json_util import dumps
 import calendar
@@ -141,13 +144,23 @@ class PSS:
         Schedule.loadData(filename)
 
     def viewDaySchedule(self, date):
+<<<<<<< Updated upstream
         mod2 = UpdatedChecking()
         listSche = mod2.hideAnti(date)
+=======
+        mod = Checking()
+        listSche = mod.hideAnti(date)
+>>>>>>> Stashed changes
         
         daySche = []
         sortedSchedule = []
         date = int(date)
         
+<<<<<<< Updated upstream
+=======
+        mod.iterateDate()
+
+>>>>>>> Stashed changes
         for task in listSche:
 
             if UpdatedChecking.isRecurring(task):
@@ -183,22 +196,21 @@ class PSS:
     def viewWeekSchedule(self, date):
         mod = Checking()
         sortedWeek = []
-
+        date = int(date)
         # Appends a day's schedule to the week schedule
         # Will not load days without tasks
         for i in range(7):
-            nextday =mod.formatDate(str(date+i))
+            nextday = mod.formatDate(str(date+i))
             sortedDay = self.viewDaySchedule(nextday)
             if sortedDay != []:
                 sortedWeek.append(sortedDay)
-
         return sortedWeek
 
     def viewMonthSchedule(self, date):
         mod = Checking()
         sortedMonth = []
         day = mod.separateDate(date)
-
+        
         endOfMonth = calendar.monthrange(day[0], day[1])[1]
         # Formats month if less than 10 and returns them to the start of the month for iteration
         if day[1] < 10:
@@ -206,10 +218,12 @@ class PSS:
         else:
             newDate = str(day[0]) + str(day[1]) + "01"
 
+        newDate = int(newDate)
+
         # Appends a day's schedule to the week schedule
         # Will not load days without tasks
         for i in range(endOfMonth):
-            nextday =mod.formatDate(str(newDate)+i)
+            nextday =mod.formatDate(newDate+i)
             sortedDay = self.viewDaySchedule(nextday)
             if sortedDay != []:
                 sortedMonth.append(sortedDay)
@@ -218,13 +232,12 @@ class PSS:
 
     def writeDaySchedule(self, filename, date):
         mod = Checking()
-        mod2 = UpdatedChecking()
         listSche = mod.hideAnti(date)
         
         daySche = []
         sortedSchedule = []
         
-        mod2.iterateDate()
+        mod.iterateDate()
 
         for task in listSche:
             if UpdatedChecking.isRecurring(task):
