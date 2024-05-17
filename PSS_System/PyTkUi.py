@@ -205,10 +205,7 @@ class CreateWindow(tk.Toplevel):
         self.label_duration.grid(row=2, column=0, sticky="e", pady=5)
         self.label_date.grid(row=3, column=0, sticky="e", pady=5)
         self.label_type.grid(row=4, column=0, sticky="e", pady=5)
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 
         self.entry_task_name.grid(row=0, column=1)
         self.entry_start_time.grid(row=1, column=1)
@@ -216,14 +213,8 @@ class CreateWindow(tk.Toplevel):
         self.entry_date.grid(row=3, column=1)
         self.entry_type.grid(row=4, column=1)
 
-<<<<<<< Updated upstream
-        self.button_submit.grid(row=5, columnspan=2, pady=8)
-=======
-
-
         self.button_submit.grid(row=5, columnspan=2, pady=8)
 
->>>>>>> Stashed changes
 
     def submit_task(self):
         # Retrieve task details from entries
@@ -246,15 +237,10 @@ class TransientTaskWindow(CreateWindow):
     def submit_task(self):
         self.task_type= "Transient Task"
         super().submit_task()
-<<<<<<< Updated upstream
-        task = Transient(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
-        messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
-=======
         task = Transient(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.task_type)
         messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
         PSS_instance = PSS()
         PSS_instance.createTask(task)
->>>>>>> Stashed changes
 
 class AntiTaskWindow(CreateWindow):
     def __init__(self, master=None):
@@ -264,16 +250,11 @@ class AntiTaskWindow(CreateWindow):
     def submit_task(self):
         self.task_type = "Anti Task"
         super().submit_task()
-<<<<<<< Updated upstream
-        task = Anti(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
-        messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
-=======
+
         task = Anti(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.task_type)
         messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
         PSS_instance = PSS()
         PSS_instance.createTask(task)
-
->>>>>>> Stashed changes
 
 class RecurringTaskWindow(CreateWindow):
     def __init__(self, master=None):
@@ -295,16 +276,10 @@ class RecurringTaskWindow(CreateWindow):
 
     def submit_task(self):
         super().submit_task()
-<<<<<<< Updated upstream
-
-        task = Recurring(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.task_type.get(), self.entry_end_date.get(), self.entry_frequency.get())
-        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
-=======
         task = Recurring(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.entry_type.get(), self.entry_end_date.get(), self.entry_frequency.get())
         messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_type.get()}\nStart Date: {self.entry_date.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
         PSS_instance = PSS()
         PSS_instance.createTask(task)
->>>>>>> Stashed changes
 
 class EditWindow(Toplevel):
     def __init__(self, master=None):

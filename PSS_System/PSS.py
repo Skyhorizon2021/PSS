@@ -61,6 +61,7 @@ class PSS:
         
         # Gets the schedule
         listSche = Schedule.getData()
+        tempSche = Schedule.getData()
 
         mod = Checking()
 
@@ -145,22 +146,16 @@ class PSS:
         
         daySche = []
         sortedSchedule = []
-        date = int(date)
+        
+        mod.iterateDate()
+
         for task in listSche:
-
             if Checking.isRecurring(task):
-                dates = mod2.iterateDate(task['StartDate'], task['EndDate'], task['Frequency'])
-                if date in dates:
-                    checktask = task['Name']
-                    for task2 in listSche:
-                        if Checking.isRecurring(task) and checktask == task['Name']:
-                            daySche.append({"Name":task['Name'], "Type":task['Type'], "Date":date, "StartTime":task['StartTime'], "Duration":task['Duration']})
-                            break                    
-            else:
-                checkDate = date
-                if task['Date'] == date:
-                    daySche.append({"Name":task['Name'], "Type":task['Type'], "Date":date, "StartTime":task['StartTime'], "Duration":task['Duration']})
-
+                if task['StartDate'] == date:
+                    daySche.append({"Name":task['Name'], "Type":task['Type'], "StartDate":task['StartDate'], "StartTime":task['StartTime'], "Duration":task['Duration']})
+            elif task['Date'] == date:
+                daySche.append({"Name":task['Name'], "Type":task['Type'], "Date":task['Date'], "StartTime":task['StartTime'], "Duration":task['Duration']})
+        
         while True:
             minTime = 24
             # Get the earliest time
@@ -181,7 +176,7 @@ class PSS:
     def viewWeekSchedule(self, date):
         mod = Checking()
         sortedWeek = []
-        date = int(date)
+
         # Appends a day's schedule to the week schedule
         # Will not load days without tasks
         for i in range(7):
@@ -189,13 +184,14 @@ class PSS:
             sortedDay = self.viewDaySchedule(nextday)
             if sortedDay != []:
                 sortedWeek.append(sortedDay)
+
         return sortedWeek
 
     def viewMonthSchedule(self, date):
         mod = Checking()
         sortedMonth = []
         day = mod.separateDate(date)
-        
+
         endOfMonth = calendar.monthrange(day[0], day[1])[1]
         # Formats month if less than 10 and returns them to the start of the month for iteration
         if day[1] < 10:
@@ -203,12 +199,10 @@ class PSS:
         else:
             newDate = str(day[0]) + str(day[1]) + "01"
 
-        newDate = int(newDate)
-
         # Appends a day's schedule to the week schedule
         # Will not load days without tasks
         for i in range(endOfMonth):
-            nextday =mod.formatDate(newDate+i)
+            nextday = mod.formatDate(str(newDate)+i)
             sortedDay = self.viewDaySchedule(nextday)
             if sortedDay != []:
                 sortedMonth.append(sortedDay)
@@ -222,8 +216,6 @@ class PSS:
         daySche = []
         sortedSchedule = []
         
-        mod.iterateDate()
-
         for task in listSche:
             if Checking.isRecurring(task):
                 if task['StartDate'] == date:
@@ -285,4 +277,3 @@ class PSS:
         for i in range(endOfMonth):
             nextday =mod.formatDate(str(newDate)+i)
             self.writeDaySchedule(filename, nextday)
-
