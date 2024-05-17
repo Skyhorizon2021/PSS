@@ -25,6 +25,9 @@ class PSS:
 
         taskType = task.type
 
+        taskStart = mod.convertTime(task.startTime)
+        taskDura = mod.validDuration
+
         # Task Creation
         if mod.noOverlapAdd(task):
             if Checking.isRecurring(task):
