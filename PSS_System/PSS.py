@@ -2,7 +2,7 @@ from Schedule import *
 from Models.RecurringModel import Recurring
 from Models.TransientModel import Transient
 from Models.AntiTaskModel import Anti
-from Checking import Checking
+from Checking import *
 import pymongo
 from bson.json_util import dumps
 import calendar
@@ -25,14 +25,17 @@ class PSS:
 
         taskType = task.type
 
+        taskStart = mod.convertTime(task.startTime)
+        taskDura = mod.validDuration
+
         # Task Creation
         if mod.noOverlapAdd(task):
-            if UpdatedChecking.isRecurring(task):
+            if Checking.isRecurring(task):
                 newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration,
                                 "EndDate":task.endDate, "Frequency":task.frequency}
-            elif UpdatedChecking.isTran(task):
+            elif Checking.isTran(task):
                 newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
-            elif UpdatedChecking.isAnti(task) and mod.checkRecurring(task):
+            elif Checking.isAnti(task) and mod.checkRecurring(task):
                 newdict = {"Task Type":task.type, "Name":task.name, "Time":task.startTime, "Duration":task.duration}
             mycol.insert_one(newdict)
         else:
@@ -51,7 +54,7 @@ class PSS:
                 taskDate = task['StartDate']
                 taskTime = task['StartTime']
                 taskDur = task['Duration']
-                if UpdatedChecking.isRecurring(task):
+                if Checking.isRecurring(task):
                     end = task['EndDate']
                     freq = task['Frequency']
                     return Recurring(taskname, taskTime, taskDur, taskDate, taskType, end, freq)
@@ -74,14 +77,14 @@ class PSS:
         # Search for task name
         for task in listSche:
             if task['Name'] == name:
-                if UpdatedChecking.isRecurring(task):
+                if Checking.isRecurring(task):
                     antiName = mod.checkAnti(task)
                     if antiName != "":
                         self.deleteTask(antiName)
                     query = {'Name':name}
-                elif UpdatedChecking.isTran(task):
+                elif Checking.isTran(task):
                     query = {'Name':name}
-                elif UpdatedChecking.isAnti(task) and mod.noOverlapAnti(task):
+                elif Checking.isAnti(task) and mod.noOverlapAnti(task):
                     query = {'Name':name}
                 mycol.delete_one(query)
 
@@ -142,22 +145,17 @@ class PSS:
 
     def viewDaySchedule(self, date):
         mod = Checking()
-        mod2 = UpdatedChecking()
         listSche = mod.hideAnti(date)
         
         daySche = []
         sortedSchedule = []
         
-        mod2.iterateDate()
-
         for task in listSche:
-            if UpdatedChecking.isRecurring(task):
+            if Checking.isRecurring(task):
                 if task['StartDate'] == date:
                     daySche.append({"Name":task['Name'], "Type":task['Type'], "StartDate":task['StartDate'], "StartTime":task['StartTime'], "Duration":task['Duration']})
             elif task['Date'] == date:
                 daySche.append({"Name":task['Name'], "Type":task['Type'], "Date":task['Date'], "StartTime":task['StartTime'], "Duration":task['Duration']})
-
-        tasknum = len(daySche)
         
         while True:
             minTime = 24
@@ -174,8 +172,7 @@ class PSS:
             # Breaks when all tasks are sorted in the schedule
             if daySche == []:
                 break
-            
-            return sortedSchedule
+        return sortedSchedule
 
     def viewWeekSchedule(self, date):
         mod = Checking()
@@ -184,7 +181,7 @@ class PSS:
         # Appends a day's schedule to the week schedule
         # Will not load days without tasks
         for i in range(7):
-            nextday =mod.formatDate(str(date+i))
+            nextday = mod.formatDate(str(date+i))
             sortedDay = self.viewDaySchedule(nextday)
             if sortedDay != []:
                 sortedWeek.append(sortedDay)
@@ -206,7 +203,7 @@ class PSS:
         # Appends a day's schedule to the week schedule
         # Will not load days without tasks
         for i in range(endOfMonth):
-            nextday =mod.formatDate(str(newDate)+i)
+            nextday = mod.formatDate(str(newDate)+i)
             sortedDay = self.viewDaySchedule(nextday)
             if sortedDay != []:
                 sortedMonth.append(sortedDay)
@@ -215,16 +212,13 @@ class PSS:
 
     def writeDaySchedule(self, filename, date):
         mod = Checking()
-        mod2 = UpdatedChecking()
         listSche = mod.hideAnti(date)
         
         daySche = []
         sortedSchedule = []
         
-        mod2.iterateDate()
-
         for task in listSche:
-            if UpdatedChecking.isRecurring(task):
+            if Checking.isRecurring(task):
                 if task['StartDate'] == date:
                     daySche.append({"Name":task['Name'], "Type":task['Type'], "StartDate":task['StartDate'], "StartTime":task['StartTime'],
                      "Duration":task['Duration'], "EndDate":task['EndDate'], "Frequency":task['Frequency']})
@@ -284,4 +278,3 @@ class PSS:
         for i in range(endOfMonth):
             nextday =mod.formatDate(str(newDate)+i)
             self.writeDaySchedule(filename, nextday)
-
