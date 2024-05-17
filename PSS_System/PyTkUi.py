@@ -83,8 +83,8 @@ class FileWindow(Toplevel):
 
     def upload(self):
         #use PSS to call readFromFile function
-
         filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
+        PSS.readFromFile(filename)
         self.file_name = tk.Label(self, text="File name: " + filename)
         print('Selected: ', filename)
 
@@ -102,8 +102,8 @@ class SaveWindow(Toplevel):
 
     def upload(self):
         #use PSS to call writeToFile function
-
         filename = filedialog.askopenfilename(title="Choose a file", filetypes= [("JSON files", "*.json")])
+        PSS.writeToFile(filename)
         self.file_name = tk.Label(self, text="File name: " + filename)
         print('Selected: ', filename)
 
@@ -116,7 +116,7 @@ class DisplayWindow(Toplevel):
         self.parent = parent
         self.type = type
     
-        self.frame=Frame(self)
+        self.frame=tk.Frame(self)
         self.frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
     
         if type == 0:
@@ -138,6 +138,7 @@ class DisplayWindow(Toplevel):
     def submit(self):
         day = self.entry.get()
         new_frame = ScheduleFrame(self.parent, self.type, day)
+
         self.parent.place_frame(new_frame)
         self.destroy()
 
@@ -145,29 +146,45 @@ class ScheduleFrame(tk.Frame):
     def __init__(self, parent, type, day):        
         tk.Frame.__init__(self, parent)
         PSS_instance = PSS()
-
         #use PSS to display using viewDaySchedule, viewWeekSchedule, viewMonthSchedule
+
+        self.canvas = tk.Canvas(self, borderwidth=0)
+        self.frame = tk.Frame(self.canvas)
+        self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.vsb.set)
+
+        self.vsb.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.canvas.create_window((4,4), window=self.frame, anchor="nw",
+                                  tags="self.frame")
+
+        self.frame.bind("<Configure>", self.onFrameConfigure)
+
         output = ""
-        if type == 0:
+        '''if type == 0:
             schedule = PSS_instance.viewDaySchedule(day)
             for task in schedule:
                 output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
-            self.label = Label(self, text="This will show day\n" + output)
+            self.frame.label = Label(self.frame, text="This will show day\n" + output)
         elif type == 1:
             schedule = PSS_instance.viewWeekSchedule(day)
             for i in range(len(schedule)):
                 for task in schedule[i]:
                     output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
-            self.label = Label(self, text="This will show week " + output)
+            self.frame.label = Label(self.frame, text="This will show week " + output)
         elif type == 2:
             schedule = PSS_instance.viewMonthSchedule(day)
             for i in range(len(schedule)):
                 for task in schedule[i]:
                     output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
-            self.label = Label(self, text="This will show month " + output)
+            self.frame.label = Label(self.frame, text="This will show month " + output)
         else:
-            self.label = Label(self.frame, text='')
-        self.label.pack()
+            self.frame.label = Label(self.frame, text='')'''
+        self.frame.label.pack()
+
+    def onFrameConfigure(self, event):
+        '''Reset the scroll region to encompass the inner frame'''
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
 class CreateWindow(tk.Toplevel):
     def __init__(self, master=None):
@@ -175,29 +192,25 @@ class CreateWindow(tk.Toplevel):
         self.title("Create Task")
         self.geometry("400x300")
 
-        frame = Frame(self)
-        frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.frame = tk.Frame(self)
+        self.frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
         # Labels
         self.label_task_name = tk.Label(self.frame, text="Task Name:")
-        self.label_type = tk.Label(self.frame, text = "Task Type:")
-        self.label_start_time = tk.Label(self.frame, text="Start Time (HH:MM):")
+        self.label_start_time = tk.Label(self.frame, text="Start Time :")
         self.label_duration = tk.Label(self.frame, text="Duration (minutes):")
         self.label_date = tk.Label(self.frame, text="Date (YYYYMMDD):")
-        self.label_type = tk.Label(self.frame, text="Task Type:")
-
+        self.label_type = tk.Label(self.frame, text="Type:")
 
         # Entries
         self.entry_task_name = tk.Entry(self.frame)
-        self.entry_type = tk.Entry(self.frame)
         self.entry_start_time = tk.Entry(self.frame)
         self.entry_duration = tk.Entry(self.frame)
         self.entry_date = tk.Entry(self.frame)
         self.entry_type = tk.Entry(self.frame)
 
-
         # Buttons
-        self.button_submit = tk.Button(frame, text="Submit", command=self.submit_task)
+        self.button_submit = tk.Button(self.frame, text="Submit", command=self.submit_task)
 
         # Layout
         self.label_task_name.grid(row=0, column=0, sticky="e", pady=5)
@@ -205,10 +218,6 @@ class CreateWindow(tk.Toplevel):
         self.label_duration.grid(row=2, column=0, sticky="e", pady=5)
         self.label_date.grid(row=3, column=0, sticky="e", pady=5)
         self.label_type.grid(row=4, column=0, sticky="e", pady=5)
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 
         self.entry_task_name.grid(row=0, column=1)
         self.entry_start_time.grid(row=1, column=1)
@@ -216,14 +225,7 @@ class CreateWindow(tk.Toplevel):
         self.entry_date.grid(row=3, column=1)
         self.entry_type.grid(row=4, column=1)
 
-<<<<<<< Updated upstream
         self.button_submit.grid(row=5, columnspan=2, pady=8)
-=======
-
-
-        self.button_submit.grid(row=5, columnspan=2, pady=8)
-
->>>>>>> Stashed changes
 
     def submit_task(self):
         # Retrieve task details from entries
@@ -244,17 +246,9 @@ class TransientTaskWindow(CreateWindow):
         self.title("Create Transient Task")
 
     def submit_task(self):
-        self.task_type= "Transient Task"
         super().submit_task()
-<<<<<<< Updated upstream
-        task = Transient(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
-        messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
-=======
-        task = Transient(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.task_type)
-        messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
-        PSS_instance = PSS()
-        PSS_instance.createTask(task)
->>>>>>> Stashed changes
+        task = Transient(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.entry_type.get())
+        messagebox.showinfo("Task Details", f"Transient Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class AntiTaskWindow(CreateWindow):
     def __init__(self, master=None):
@@ -264,47 +258,32 @@ class AntiTaskWindow(CreateWindow):
     def submit_task(self):
         self.task_type = "Anti Task"
         super().submit_task()
-<<<<<<< Updated upstream
-        task = Anti(self.entry_task_name.get(), self.task_type, self.entry_start_time.get(), self.entry_duration.get())
-        messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_task_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
-=======
-        task = Anti(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.task_type)
-        messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
-        PSS_instance = PSS()
-        PSS_instance.createTask(task)
-
->>>>>>> Stashed changes
+        task = Anti(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.entry_type.get())
+        messagebox.showinfo("Task Details", f"Anti Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}")
 
 class RecurringTaskWindow(CreateWindow):
     def __init__(self, master=None):
         super().__init__(master=master)
         self.title("Create Recurring Task")
-        
+
         # Add additional fields specific to Recurring Tasks
-        self.label_end_date = tk.Label(self, text="End Date (YYYYMMDD):")
-        self.label_frequency = tk.Label(self, text="Frequency:")
+        self.label_end_date = tk.Label(self.frame, text="End Date (YYYYMMDD):")
+        self.label_frequency = tk.Label(self.frame, text="Frequency:")
 
-        self.entry_end_date = tk.Entry(self)
-        self.entry_frequency = tk.Entry(self)
+        self.entry_end_date = tk.Entry(self.frame)
+        self.entry_frequency = tk.Entry(self.frame)
 
-        self.label_end_date.grid(row=5, column=0, sticky="e", pady=5)
-        self.entry_end_date.grid(row=5, column=1)
-        self.label_frequency.grid(row=6, column=0, sticky="e", pady=5)
-        self.entry_frequency.grid(row=6, column=1)
-        self.button_submit.grid(row=7, columnspan=2, pady=8)
+        self.label_end_date.grid(row=6, column=0, sticky="e", pady=5)
+        self.entry_end_date.grid(row=6, column=1)
+        self.label_frequency.grid(row=7, column=0, sticky="e", pady=5)
+        self.entry_frequency.grid(row=7, column=1)
+        self.button_submit.grid(row=8, columnspan=2, pady=8)
 
     def submit_task(self):
+        self.task_type = "Recurring Task"
         super().submit_task()
-<<<<<<< Updated upstream
-
-        task = Recurring(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.task_type.get(), self.entry_end_date.get(), self.entry_frequency.get())
-        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.task_type}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
-=======
-        task = Recurring(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_date.get(), self.entry_type.get(), self.entry_end_date.get(), self.entry_frequency.get())
-        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_type.get()}\nStart Date: {self.entry_date.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
-        PSS_instance = PSS()
-        PSS_instance.createTask(task)
->>>>>>> Stashed changes
+        task = Recurring(self.entry_task_name.get(), self.entry_start_time.get(), self.entry_duration.get(), self.entry_type.get(), self.entry_end_date.get(), self.entry_frequency.get())
+        messagebox.showinfo("Task Details", f"Recurring Task:\nName: {self.entry_task_name.get()}\nType: {self.entry_type.get()}\nStart Time: {self.entry_start_time.get()}\nDuration: {self.entry_duration.get()}\nEnd Date: {self.entry_end_date.get()}\nFrequency: {self.entry_frequency.get()}")
 
 class EditWindow(Toplevel):
     def __init__(self, master=None):
@@ -336,7 +315,6 @@ class EditWindow(Toplevel):
         self.tran_button = Button(self, text="Transient Task", command=lambda: self.create_transient_task(task))
         self.anti_button = Button(self, text="Anti Task", command=lambda: self.create_anti_task(task))
 
-        self.label.place(relx=.5, rely=.3, anchor = CENTER)
         self.next.place(relx=.5, rely=.4, anchor = CENTER)
         self.recur_button.place(relx=.5, rely=.5, anchor = CENTER)
         self.tran_button.place(relx=.5, rely=.6, anchor = CENTER)
@@ -378,7 +356,6 @@ class DeleteWindow(tk.Toplevel):
         #deleteTasks(task_name)
         messagebox.showinfo("Task Deleted", f"Task '{task_name}' has been deleted.")
     
-
 class FindWindow(tk.Toplevel):
     def __init__(self, master=None):
         super().__init__(master=master)
@@ -394,9 +371,9 @@ class FindWindow(tk.Toplevel):
         self.button.place(relx=.5, rely=.5, anchor = CENTER)
 
     def search(self):
-        #task = PSS.viewTask(self.entry.get())
+        task = PSS.viewTask(self.entry.get())
         #turn task into a string, assign to output, else give error
-        output = ""
+        output = task
         self.show = Label(self, text=output)
         self.label.destroy()
         self.entry.destroy()
@@ -411,14 +388,16 @@ class MainWindow(tk.Tk):
 
         menubar = MenuBar(self)
 
-        default = Frame(self)
-        self.place_frame(default)
-        label = Label(default, text="Default Screen")
+        self.frame = Frame(self)
+        self.frame.pack()
+        label = Label(self.frame, text="Default Screen")
         label.pack()
 
     def place_frame(self, frame):
-        frame.grid(row=0, column=0, sticky="nsew")
-        frame.tkraise()
+        self.frame.destroy()
+        self.frame = frame
+        self.frame.pack(side="top", fill="both", expand=True)
+        self.frame.tkraise()
         
 
 if __name__ == "__main__":
