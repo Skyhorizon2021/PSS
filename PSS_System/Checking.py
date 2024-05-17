@@ -29,11 +29,12 @@ class Checking:
 
     # Validates correct task type
     def checkType(self, type):
-        taskTypes = ["Anti Task", "Recurring Task", "Transient Task"]
+        taskTypes = ["Study", "Class", "Sleep", "Exercise", "Work", "Meal", "Cancellation", "Visit", "Shopping", "Appointment"]
         if type in taskTypes:
             return True
         else:
             return False
+        
     
     # Validates correct frequency
     def checkFreq(self, freq):
