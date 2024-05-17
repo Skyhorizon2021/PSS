@@ -257,7 +257,7 @@ class Checking:
 
         # Iterates through the data to search for the matching recurring task
         for task in listSche:
-            if task['StartDate'] == date[i] and task.startTime == task['StartTime'] and task.duration == task['Duration'] and isRecurring(task):
+            if task['StartDate'] == date and task.startTime == task['StartTime'] and task.duration == task['Duration'] and Checking.isRecurring(task):
                 return True
         return False
 
@@ -278,22 +278,21 @@ class Checking:
         listSche = Schedule.getData()
 
         for task in listSche:
-            if task['StartDate'] == date:
-                if task['Type'] == "Cancellation":
+            if task['Type'] == "Cancellation":
+                if task['Date'] == date:
                     anti = task
-            for matchtask in listSche:
-                if matchtask['StartTime'] == anti['StartTime'] and matchtask['Duration'] == anti['Duration'] and isRecurring(matchtask):
-                    # Get recurring dates
-                    datesRE = self.iterateDate(matchtask['StartDate'], matchtask['EndDate'], matchtask['Frequency'])
-                    for days in datesRE:
-                        # Removes anti and recurring from displayed schedule if an instance of the recurring day matches with antitask date
-                        if days == date:
-                            listSche.remove(task)
-                            listSche.remove(matchtask)
+                    for matchtask in listSche:
+                        if matchtask['StartTime'] == anti['StartTime'] and matchtask['Duration'] == anti['Duration'] and Checking.isRecurring(matchtask):
+                            # Get recurring dates
+                            datesRE = self.iterateDate(matchtask['StartDate'], matchtask['EndDate'], matchtask['Frequency'])
+                            for days in datesRE:
+                                # Removes anti and recurring from displayed schedule if an instance of the recurring day matches with antitask date
+                                if days == date:
+                                    listSche.remove(task)
+                                    listSche.remove(matchtask)
+                                    break
                             break
-                    break
-
-        return listSche
+        return listSche 
         
 
     def isRecurring(task):

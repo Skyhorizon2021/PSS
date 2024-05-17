@@ -183,7 +183,7 @@ class PSS:
         # Appends a day's schedule to the week schedule
         # Will not load days without tasks
         for i in range(7):
-            nextday = mod.formatDate(str(date+i))
+            nextday = mod.formatDate(str(int(date)+i))
             sortedDay = self.viewDaySchedule(nextday)
             if sortedDay != []:
                 sortedWeek.append(sortedDay)
@@ -205,7 +205,7 @@ class PSS:
         # Appends a day's schedule to the week schedule
         # Will not load days without tasks
         for i in range(endOfMonth):
-            nextday = mod.formatDate(str(newDate)+i)
+            nextday = mod.formatDate(str(int(newDate)+i))
             sortedDay = self.viewDaySchedule(nextday)
             if sortedDay != []:
                 sortedMonth.append(sortedDay)
