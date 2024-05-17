@@ -138,6 +138,7 @@ class DisplayWindow(Toplevel):
     def submit(self):
         day = self.entry.get()
         new_frame = ScheduleFrame(self.parent, self.type, day)
+
         self.parent.place_frame(new_frame)
         self.destroy()
 
@@ -147,19 +148,43 @@ class ScheduleFrame(tk.Frame):
         PSS_instance = PSS()
         #use PSS to display using viewDaySchedule, viewWeekSchedule, viewMonthSchedule
 
+        self.canvas = tk.Canvas(self, borderwidth=0)
+        self.frame = tk.Frame(self.canvas)
+        self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.vsb.set)
+
+        self.vsb.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.canvas.create_window((4,4), window=self.frame, anchor="nw",
+                                  tags="self.frame")
+
+        self.frame.bind("<Configure>", self.onFrameConfigure)
+
         output = ""
-        if type == 0:
-            self.label = Label(self, text="This will show day " + output)
-            PSS_instance.viewDaySchedule(day)
+        '''if type == 0:
+            schedule = PSS_instance.viewDaySchedule(day)
+            for task in schedule:
+                output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
+            self.frame.label = Label(self.frame, text="This will show day\n" + output)
         elif type == 1:
-            self.label = Label(self, text="This will show week " + output)
-            PSS_instance.viewWeekSchedule(day)
+            schedule = PSS_instance.viewWeekSchedule(day)
+            for i in range(len(schedule)):
+                for task in schedule[i]:
+                    output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
+            self.frame.label = Label(self.frame, text="This will show week " + output)
         elif type == 2:
-            self.label = Label(self, text="This will show month " + output)
-            PSS_instance.viewMonthSchedule(day)
+            schedule = PSS_instance.viewMonthSchedule(day)
+            for i in range(len(schedule)):
+                for task in schedule[i]:
+                    output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
+            self.frame.label = Label(self.frame, text="This will show month " + output)
         else:
-            self.label = Label(self.frame, text='')
-        self.label.pack()
+            self.frame.label = Label(self.frame, text='')'''
+        self.frame.label.pack()
+
+    def onFrameConfigure(self, event):
+        '''Reset the scroll region to encompass the inner frame'''
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
 class CreateWindow(tk.Toplevel):
     def __init__(self, master=None):
@@ -330,7 +355,6 @@ class DeleteWindow(tk.Toplevel):
         #deleteTasks(task_name)
         messagebox.showinfo("Task Deleted", f"Task '{task_name}' has been deleted.")
     
-
 class FindWindow(tk.Toplevel):
     def __init__(self, master=None):
         super().__init__(master=master)
@@ -363,14 +387,16 @@ class MainWindow(tk.Tk):
 
         menubar = MenuBar(self)
 
-        default = Frame(self)
-        self.place_frame(default)
-        label = Label(default, text="Default Screen")
+        self.frame = Frame(self)
+        self.frame.pack()
+        label = Label(self.frame, text="Default Screen")
         label.pack()
 
     def place_frame(self, frame):
-        frame.grid(row=0, column=0, sticky="nsew")
-        frame.tkraise()
+        self.frame.destroy()
+        self.frame = frame
+        self.frame.pack(side="top", fill="both", expand=True)
+        self.frame.tkraise()
         
 
 if __name__ == "__main__":
