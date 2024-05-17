@@ -277,23 +277,26 @@ class Checking:
     # For viewing task
     def hideAnti(self, date):
         listSche = Schedule.getData()
+        tempSche = Schedule.getData()
 
         for task in listSche:
-            if task['StartDate'] == date:
-                if task['Type'] == "Cancellation":
-                    anti = task
-            for matchtask in listSche:
-                if matchtask['StartTime'] == anti['StartTime'] and matchtask['Duration'] == anti['Duration'] and isRecurring(matchtask):
-                    # Get recurring dates
-                    datesRE = self.iterateDate(matchtask['StartDate'], matchtask['EndDate'], matchtask['Frequency'])
-                    for days in datesRE:
-                        # Removes anti and recurring from displayed schedule if an instance of the recurring day matches with antitask date
-                        if days == date:
-                            listSche.remove(task)
-                            listSche.remove(matchtask)
-                            break
-                    break
-
+            # Checking for antitask in schedule
+            if Checking.isAnti(task) and task['Date'] == date:
+                taskStart = task['StartTime']
+                taskDura = task['Duration']
+                tempSche.remove(task)
+                # Search for recurring to match
+                for matchtask in tempSche:
+                    if matchtask['StartTime'] == taskStart and matchtask['Duration'] == taskDura and Checking.isRecurring(matchtask):
+                        # Get recurring dates
+                        datesRE = self.iterateDate(matchtask['StartDate'], matchtask['EndDate'], matchtask['Frequency'])
+                        for days in datesRE:
+                            # Removes anti and recurring from displayed schedule if an instance of the recurring day matches with antitask date
+                            if days == date:
+                                listSche.remove(task)
+                                listSche.remove(matchtask)
+                                break
+                        break
         return listSche
         
 
