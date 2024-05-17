@@ -145,7 +145,7 @@ class DisplayWindow(Toplevel):
 class ScheduleFrame(tk.Frame):
     def __init__(self, parent, type, day):        
         tk.Frame.__init__(self, parent)
-        PSS_instance = PSS()
+        self.PSS_instance = PSS()
         #use PSS to display using viewDaySchedule, viewWeekSchedule, viewMonthSchedule
 
         self.canvas = tk.Canvas(self, borderwidth=0)
@@ -161,25 +161,26 @@ class ScheduleFrame(tk.Frame):
         self.frame.bind("<Configure>", self.onFrameConfigure)
 
         output = ""
-        '''if type == 0:
-            schedule = PSS_instance.viewDaySchedule(day)
+        if type == 0:
+            schedule = self.PSS_instance.viewDaySchedule(day)
+            print(schedule)
             for task in schedule:
                 output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
             self.frame.label = Label(self.frame, text="This will show day\n" + output)
         elif type == 1:
-            schedule = PSS_instance.viewWeekSchedule(day)
+            schedule = self.PSS_instance.viewWeekSchedule(day)
             for i in range(len(schedule)):
                 for task in schedule[i]:
                     output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
             self.frame.label = Label(self.frame, text="This will show week " + output)
         elif type == 2:
-            schedule = PSS_instance.viewMonthSchedule(day)
+            schedule = self.PSS_instance.viewMonthSchedule(day)
             for i in range(len(schedule)):
                 for task in schedule[i]:
                     output = output + "Name: " + task['Name'] + "\nType: " + task['Type'] + "\nDate: " + str(task['Date']) + "\nStart Time: " + str(task['StartTime']) + "\nDuration: " + str(task['Duration']) + "\n\n"
             self.frame.label = Label(self.frame, text="This will show month " + output)
         else:
-            self.frame.label = Label(self.frame, text='')'''
+            self.frame.label = Label(self.frame, text='')
         self.frame.label.pack()
 
     def onFrameConfigure(self, event):
@@ -305,15 +306,18 @@ class EditWindow(Toplevel):
         self.button.place(relx=.5, rely=.5, anchor = CENTER)
 
     def search(self):
-        #task = PSS.viewTask(self.entry.get())
+        task = PSS.viewTask(self.entry.get())
         #turn task into a string, assign to output, else give error
-        task = ""
-        output = ""
+        #task = ""
+        output = "Name: " + task.name + "\nType: " + task.type + "\nDate: " + str(task.date) + "\nStart Time: " + str(task.startTime) + "\nDuration: " + str(task.duration) + "\n\n"
         print(self.entry.get())
 
-        self.label = Label(self, text=output)
+        #self.label = Label(self, text=output)
         self.entry.destroy()
         self.label.destroy()
+        self.button.destroy()
+        self.label = Label(self, text=output)
+        self.label.place(relx=.5, rely=.2, anchor = CENTER)
 
         self.next = Label(self, text="What type of task would you like to create?")
         self.recur_button = Button(self, text="Recurring Task", command=lambda: self.create_recurring_task(task))
@@ -321,9 +325,9 @@ class EditWindow(Toplevel):
         self.anti_button = Button(self, text="Anti Task", command=lambda: self.create_anti_task(task))
 
         self.next.place(relx=.5, rely=.4, anchor = CENTER)
-        self.recur_button.place(relx=.5, rely=.5, anchor = CENTER)
-        self.tran_button.place(relx=.5, rely=.6, anchor = CENTER)
-        self.anti_button.place(relx=.5, rely=.7, anchor = CENTER)
+        self.recur_button.place(relx=.5, rely=.6, anchor = CENTER)
+        self.tran_button.place(relx=.5, rely=.7, anchor = CENTER)
+        self.anti_button.place(relx=.5, rely=.8, anchor = CENTER)
     
     def create_recurring_task(self, task):
         self.new_window = RecurringTaskWindow()
@@ -378,7 +382,7 @@ class FindWindow(tk.Toplevel):
     def search(self):
         task = PSS.viewTask(self.entry.get())
         #turn task into a string, assign to output, else give error
-        output = task
+        output = "Name: " + task.name + "\nType: " + task.type + "\nDate: " + str(task.date) + "\nStart Time: " + str(task.startTime) + "\nDuration: " + str(task.duration) + "\n\n"
         self.show = Label(self, text=output)
         self.label.destroy()
         self.entry.destroy()
